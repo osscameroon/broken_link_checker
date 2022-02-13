@@ -38,6 +38,7 @@ Install dependency:
 
 ```bash
 pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
 Finally, run:
