@@ -45,7 +45,7 @@ class Checker:
 
         # Represent a regex to find all link URLs inside an HTML source
         self.REGEX_HTML_URL = re.compile(
-            r"(href=[\'\"](.*?)[\'\"])|(href=(.*?)[ |>])",
+            r"href=[\'\"](.*?)[\'\"]|href=(.*?)[ |>]|<link>(.*?)</link>",
             re.IGNORECASE
         )
 
@@ -111,14 +111,17 @@ class Checker:
         :data represent the HTML source of the parent URL
     """
     def update_list(self, parent_url: str, data: str) -> None:
-        urls = self.REGEX_HTML_URL.findall(data)
+        matches = self.REGEX_HTML_URL.findall(data)
 
         # In this step, we have two possibilities
         # 1. The URL belongs to the HOST
         # 1.1. The URL is absolute
         # 1.2. The URL is relative
         # 2. The URL don't belongs to the HOST
-        for _, _, _, url in urls:
+        for match in matches:
+            # We get the URL match
+            url = match[0] or match[1] or match[2]
+
             # 1.1
             if self.conn.is_same_host(url):
                 # We verify that the URL is not already added nor checked
