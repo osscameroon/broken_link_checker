@@ -15,7 +15,7 @@ This is a console project that will run as a cron job.
 First, clone the repository to your local machine:
 
 ```bash
-git clone hhttps://github.com/osscameroon/broken_link_checker.git
+git clone https://github.com/osscameroon/broken_link_checker.git
 ```
 
 Create a virtual env:
