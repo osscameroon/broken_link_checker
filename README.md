@@ -10,5 +10,41 @@ This project aims to build a Web service that takes the URL, browse all the webs
 # Labels
 This is a console project that will run as a cron job.
 
+# Running the Project Locally
+
+First, clone the repository to your local machine:
+
+```bash
+git clone https://gitlab.com/osscameroon/broken_link_checker.git
+```
+
+Create a virtual env:
+
+```bash
+python3 -m venv blc_venv
+```
+
+Active the virtual env:
+## Linux
+```bash
+source blc_venv/bin/activate
+```
+## Windows
+```cmd
+blc_venv\Scripts\activate.bat
+```
+
+Install dependency:
+
+```bash
+pip install --upgrade pip
+```
+
+Finally, run:
+
+```bash
+python broken_link_checker/main.py https://example.com --delay 1
+```
+
 # License
 MIT
