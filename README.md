@@ -38,12 +38,13 @@ Install dependency:
 
 ```bash
 pip install --upgrade pip
-pip install -r requirements.txt
+pip install -r broken_link_checker/requirements.txt
 ```
 
 Finally, run:
 
 ```bash
+cd broken_link_checker
 python broken_link_checker/main.py https://example.com --delay 1
 ```
 
