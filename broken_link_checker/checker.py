@@ -45,7 +45,9 @@ class Checker:
 
         # Represent a regex to find all link URLs inside an HTML source
         self.REGEX_HTML_URL = re.compile(
-            r"href=[\'\"](.*?)[\'\"]|href=(.*?)[ |>]|<link>(.*?)</link>",
+            r"href=[\'\"](.*?)[\'\"]"
+            r"|href=(.*?)[ |>]"
+            r"|<link>(.*?)</link>",
             re.IGNORECASE
         )
 
