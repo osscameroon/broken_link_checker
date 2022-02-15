@@ -48,5 +48,14 @@ cd broken_link_checker
 python broken_link_checker/main.py https://example.com --delay 1
 ```
 
+To receive a report by email, you can use this command
+
+```bash
+python broken_link_checker/main.py https://example.com --delay 1 --sender <sender_email_address>\
+ --password <sender_password> --smptp_server <smtp_server:port> --recipient <recipient_email_address>
+```
+
+*NB:* Some email service provider ask to enable some settings to allow less secure apps. 
+
 # License
 MIT
