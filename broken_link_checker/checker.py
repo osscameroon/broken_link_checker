@@ -43,17 +43,22 @@ class Checker:
         # Will represent the list of broken URL
         self.broken_url = []
 
-        # Represent a regex to find all link URLs inside an HTML source
-        self.REGEX_HTML_URL = re.compile(
+        # Represent a regex to find all link URLs inside an text source
+        self.REGEX_TEXT_URL = re.compile(
             r"href=[\'\"](.*?)[\'\"]"
             r"|href=(.*?)[ |>]"
-            r"|<link>(.*?)</link>",
+            r"|<link>(.*?)</link>"
+            r"|<url>(.*?)</url>"
+            r"|src=[\'\"](.*?)[\'\"]"
+            # Ref: http://www.regexguru.com/2008/11/detecting-urls-in-a-block-of-text/
+            r"|\b(https?://[-A-Z0-9+&@#/%?=~_|!:,.;]*[A-Z0-9+&@#/%=~_|])",
             re.IGNORECASE
         )
 
         # Regex to verify the content type
         self.REGEX_CONTENT_TYPE = re.compile(
-            r"text/[xml|html]",
+            r"text/(xml|html)"
+            r"|application/(rss|xml)",
             re.IGNORECASE
         )
 
@@ -117,7 +122,7 @@ class Checker:
         :data represent the HTML source of the parent URL
     """
     def update_list(self, parent_url: str, data: str) -> None:
-        matches = self.REGEX_HTML_URL.findall(data)
+        matches = self.REGEX_TEXT_URL.findall(data)
 
         # In this step, we have two possibilities
         # 1. The URL belongs to the HOST
@@ -126,7 +131,7 @@ class Checker:
         # 2. The URL don't belongs to the HOST
         for match in matches:
             # We get the URL match
-            url = match[0] or match[1] or match[2]
+            url = [i for i in match if i][0]
 
             # 1.1
             if self.conn.is_same_host(url):
