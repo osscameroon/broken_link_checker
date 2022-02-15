@@ -135,8 +135,14 @@ class Checker:
             else:
                 # 1.2
                 if not urllib3.util.parse_url(url).scheme:
-                    # We build the absolute URL
-                    url = '/' + parent_url.strip('/') + '/' + url.strip('/')
+                    if urllib3.util.parse_url(url).path:
+                        # We build the absolute URL
+                        url = '/' + parent_url.strip('/') + '/' + url
+                    else:
+                        # Since this URL is relative
+                        # maybe it is not different of the parent
+                        # Eg: /home and /home#
+                        continue
                 # 2
                 else:
                     # print('[WARNING] the URL %s don\'t belong the host'%url)
