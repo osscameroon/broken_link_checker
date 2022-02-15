@@ -66,6 +66,10 @@ class Checker:
         # We get only the path part
         url = parse_url(url).path or '/'
 
+        # We verify the URL is already checked
+        if url in self.checked_url:
+            return
+
         print('[INFO] Checking of %s...' % url)
 
         # We make a connection
