@@ -130,28 +130,27 @@ class Checker:
 
             # 1.1
             if self.conn.is_same_host(url):
-                # We verify that the URL is not already added nor checked
-                if url not in self.url_to_check \
-                    and url not in self.checked_url \
-                        and url != parent_url:
-                    print('[INFO] Add the URL %s' % url)
-                    self.url_to_check.append(url)
+                pass
             # 1.2 and 2
             else:
                 # 1.2
                 if not urllib3.util.parse_url(url).scheme:
                     # We build the absolute URL
                     url = '/' + parent_url.strip('/') + '/' + url.strip('/')
-                    # We verify that the URL is not already added nor checked
-                    if url not in self.url_to_check \
-                        and url not in self.checked_url \
-                            and url != parent_url:
-                        self.url_to_check.append(url)
-                        print('[INFO] Add the URL %s' % url)
                 # 2
                 else:
                     # print('[WARNING] the URL %s don\'t belong the host'%url)
-                    pass
+                    continue
+
+            # At this point, the URL belongs to the HOST
+            # We verify that the URL is neither already added nor checked
+            if url not in self.url_to_check \
+                and url not in self.checked_url \
+                    and url != parent_url:
+                print('[INFO] Add the URL %s' % url)
+                self.url_to_check.append(url)
+            else:
+                continue
 
     """
         This method run the checker
