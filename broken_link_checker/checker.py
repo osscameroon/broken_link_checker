@@ -62,14 +62,14 @@ class Checker:
             re.IGNORECASE
         )
 
-    """
-        This method verify if a link is broken of not
-        If not broken and is webpage, update the list of URL to check with the
-        children link of this link
-
-        :url represent the URL to check
-    """
     def check(self, url: str) -> None:
+        """
+            This method verify if a link is broken of not
+            If not broken and is webpage, update the list of URL to check with the
+            children link of this link
+
+            :url represent the URL to check
+        """
         # We get only the path part
         url = parse_url(url).path or '/'
 
