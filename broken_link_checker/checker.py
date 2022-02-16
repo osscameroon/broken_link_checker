@@ -3,6 +3,7 @@
 
 import urllib3
 from urllib3.util import Timeout, parse_url, Url
+from urllib.parse import urljoin
 import time
 import logging
 import re
@@ -143,10 +144,7 @@ class Checker:
                     # We verify if the URL is different of the parent
                     if not url.startswith('#') and not url.startswith('?'):
                         # We build the absolute URL
-                        if parent_url == '/':
-                            url = '/' + url
-                        else:
-                            url = '/' + parent_url.strip('/') + '/' + url
+                        url = urljoin(parent_url, url)
                     else:
                         # Since this URL is relative
                         # maybe it is not different of the parent
