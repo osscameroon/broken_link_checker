@@ -1,3 +1,5 @@
+"""Notifier module."""
+
 # Import smtplib for the actual sending function
 import smtplib
 # Here are the email package modules we'll need
@@ -5,12 +7,28 @@ from email.message import EmailMessage
 
 
 class Notifier:
+    """
+    Notify by email.
+
+    :smtp_server represent the address of the email service provider
+    :username represent the email of the sender
+    :password represent the password of the sender
+    """
+
     def __init__(self, smtp_server, username, password):
+        """Init the notifier."""
         self.smtp_server = smtp_server
         self.sender = username
         self.password = password
 
     def send(self, recipient, subject, body):
+        """
+        Send an email.
+
+        :recipient represent the email of the dest
+        :subject represent the subject of the notification
+        :body represent the content of the notification
+        """
         # Create the container email message.
         msg = EmailMessage()
         msg['Subject'] = subject

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""Checker module."""
 
 import urllib3
 from urllib3.util import Timeout, parse_url, Url
@@ -14,11 +15,14 @@ logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 class Checker:
     """
-        This module permit to check if an broken URL
-         is present inside a website.
-        :host represent the website to check
+    Check if an broken URL is present inside a website.
+
+    :host represent the website to check
+    :delay represent the delay between each request
     """
+
     def __init__(self, host: str, delay: int = 1):
+        """Init the checker."""
         # We config the connection
         self.conn = urllib3.connection_from_url(
             host,
@@ -63,14 +67,14 @@ class Checker:
             re.IGNORECASE
         )
 
-    """
-        This method verify if a link is broken of not
-        If not broken and is webpage, update the list of URL to check with the
-        children link of this link
-
-        :url represent the URL to check
-    """
     def check(self, url: str) -> None:
+        """
+        Verify if a link is broken of not.
+
+        If not broken and is webpage, update the list of URL
+         to check with the child links of this link
+        :url represent the URL to check
+        """
         # We get only the path part
         url = parse_url(url).path or '/'
 
@@ -115,14 +119,14 @@ class Checker:
         # We mark the URL checked
         self.checked_url.append(url)
 
-    """
-        This method update the list of URL to checked in function
-         of the URL get in a webpage.
+    def update_list(self, parent_url: str, data: str) -> None:
+        """
+        Update the list of URL to checked in function of the URL get in a webpage.
+
         :parent_url represent the parent of these URL
         It need for the conversion of relative URL to absolute URL
-        :data represent the HTML source of the parent URL
-    """
-    def update_list(self, parent_url: str, data: str) -> None:
+        :data represent the code source of the parent URL
+        """
         matches = self.REGEX_TEXT_URL.findall(data)
 
         # In this step, we have two possibilities
@@ -165,10 +169,8 @@ class Checker:
             else:
                 continue
 
-    """
-        This method run the checker
-    """
     def run(self) -> None:
+        """Run the checker."""
         # We check while we have an URL unchecked
         while (self.url_to_check):
             self.check(self.url_to_check.pop(0))
