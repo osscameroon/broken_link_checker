@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""Checker module."""
 
 import urllib3
 from urllib3.util import Timeout, parse_url, Url

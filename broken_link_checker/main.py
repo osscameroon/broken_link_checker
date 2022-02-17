@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""Main module of the Broken Link Checker."""
+
 
 from argparse import ArgumentParser
 from checker import Checker
