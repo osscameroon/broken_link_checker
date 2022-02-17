@@ -9,7 +9,7 @@ from notifier import Notifier
 
 if __name__ == '__main__':
     parser = ArgumentParser()
-    parser.add_argument('HOST', help='Eg: http://example.com')
+    parser.add_argument('HOST', help='Eg: http://example.com', default=None)
     parser.add_argument('-d', '--delay', type=float, default=1,
                         help='It represent the delay between each request')
     parser.add_argument('-s', '--sender', type=str, default=None,
