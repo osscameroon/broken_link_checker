@@ -51,8 +51,14 @@ python broken_link_checker https://example.com --delay 1
 To receive a report by email, you can use this command
 
 ```bash
-python broken_link_checker https://example.com --delay 1 --sender <sender_email_address>\
+python broken_link_checker --host https://example.com --delay 1 --sender <sender_email_address>\
  --password <sender_password> --smptp_server <smtp_server:port> --recipient <recipient_email_address>
+```
+
+If also possible to specify a config file
+NB: Refer to our default config file *broken_link_checker/conf.ini* to knw how to write it.
+```bash
+python broken_link_checker -c config.ini
 ```
 
 *NB:* Some email service provider ask to enable some settings to allow less secure apps. 
