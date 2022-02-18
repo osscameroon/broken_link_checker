@@ -6,26 +6,73 @@
 from argparse import ArgumentParser
 from checker import Checker
 from notifier import Notifier
+from configparser import ConfigParser
+import sys
 
-if __name__ == '__main__':
-    parser = ArgumentParser()
-    parser.add_argument('HOST', help='Eg: http://example.com', default=None)
-    parser.add_argument('-d', '--delay', type=float, default=1,
+
+def main(args):
+    """Do something."""
+    # parse values from a configuration file if provided and use those as the
+    # default values for the argparse arguments
+    config_argparse = ArgumentParser(add_help=False)
+    config_argparse.add_argument('-c', '--config-file',
+                                 help='path to configuration file')
+    config_args, _ = config_argparse.parse_known_args(args)
+
+    defaults = {
+        "host": None,
+        "delay": None,
+        "sender": None,
+        "password": None,
+        "smtp_server": None,
+        "recipient": None,
+    }
+
+    if config_args.config_file:
+        try:
+            config_parser = ConfigParser()
+            with open(config_args.config_file) as f:
+                config_parser.read_file(f)
+            config_parser.read(config_args.config_file)
+        except OSError as err:
+            print(err)
+            sys.exit(1)
+
+        defaults.update(dict(config_parser.items('config-broken-link')))
+
+    # parse the program's main arguments using the dictionary of defaults and
+    # the previous parsers as "parent' parsers
+    parser = ArgumentParser(
+        description="If the host is not specified, the conf.ini will be loaded",
+        parents=[config_argparse])
+    parser.set_defaults(**defaults)
+    parser.add_argument('-H', '--host', type=str,
+                        help='Eg: http://example.com')
+    parser.add_argument('-d', '--delay', type=float,
                         help='It represent the delay between each request')
-    parser.add_argument('-s', '--sender', type=str, default=None,
+    parser.add_argument('-s', '--sender', type=str,
                         help='It represent the email used to send the report')
-    parser.add_argument('-p', '--password', type=str, default=None,
+    parser.add_argument('-p', '--password', type=str,
                         help='It represent the password used for the login')
-    parser.add_argument('-S', '--smtp_server', type=str, default=None,
+    parser.add_argument('-S', '--smtp_server', type=str,
                         help='It represent the email server used to send the report')
-    parser.add_argument('-r', '--recipient', type=str, default=None,
+    parser.add_argument('-r', '--recipient', type=str,
                         help='It represent the email where send the report')
     args = parser.parse_args()
 
+    # We verify the dependency
+    if (args.delay or args.smtp_server) and not args.host:
+        parser.error('host is required')
+    elif (args.sender or args.password or args.smtp_server or args.recipient)\
+            and not (args.sender and args.password and args.smtp_server and args.recipient):
+        parser.error('bad configuration of the notifier')
+    else:
+        pass
+
     # We initialize the checker
     checker = Checker(
-        args.HOST,
-        delay=args.delay,
+        args.host,
+        delay=args.delay or 1.0,
     )
 
     # We initialize the notifier
@@ -42,7 +89,7 @@ if __name__ == '__main__':
     # and broken links are found
     if args.smtp_server and checker.broken_url:
         # We build the report
-        msg = f"Hello, your website <{args.HOST}>"\
+        msg = f"Hello, your website <{args.host}>"\
             f" contains {len(checker.broken_url)} broken links:\n"
         msg += '\n'.join(checker.broken_url)
 
@@ -51,3 +98,7 @@ if __name__ == '__main__':
         notifier.send(subject='Broken links found', body=msg, recipient=args.recipient)
     else:
         print('Broken links:\n' + '\n'.join(checker.broken_url))
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
