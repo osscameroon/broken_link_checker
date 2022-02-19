@@ -55,6 +55,7 @@ class Checker:
             r"|<link>(.*?)</link>"
             r"|<url>(.*?)</url>"
             r"|src=[\'\"](.*?)[\'\"]"
+            r"|src=(.*?)[ |>]"
             # Ref: http://www.regexguru.com/2008/11/detecting-urls-in-a-block-of-text/
             r"|\b(https?://[-A-Z0-9+&@#/%?=~_|!:,.;]*[A-Z0-9+&@#/%=~_|])",
             re.IGNORECASE
