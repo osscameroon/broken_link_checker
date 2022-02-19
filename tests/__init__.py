@@ -1,0 +1,1 @@
+from .checker_test import CheckerTest
