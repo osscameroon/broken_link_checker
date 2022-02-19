@@ -33,7 +33,7 @@ class CheckerTest(unittest.TestCase):
                 24
             )
 
-    def test_regex_with_html(self):
+    def test_regex_with_xml(self):
         """Test for the rss source."""
         checker = Checker('localhost')
 
