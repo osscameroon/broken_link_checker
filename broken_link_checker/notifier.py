@@ -15,13 +15,13 @@ class Notifier:
     :password represent the password of the sender
     """
 
-    def __init__(self, smtp_server, username, password):
+    def __init__(self, smtp_server: str, username: str, password: str):
         """Init the notifier."""
         self.smtp_server = smtp_server
         self.sender = username
         self.password = password
 
-    def send(self, recipient, subject, body):
+    def send(self, recipient: str, subject: str, body: str) -> None:
         """
         Send an email.
 
