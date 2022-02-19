@@ -58,7 +58,12 @@ python broken_link_checker --host https://example.com --delay 1 --sender <sender
 If also possible to specify a config file
 NB: Refer to our default config file *broken_link_checker/conf.ini* to knw how to write it.
 ```bash
-python broken_link_checker -c config.ini
+cp example.conf.ini conf.ini
+```
+
+Apply your modifications and run the program
+```bash
+python broken_link_checker -c conf.ini
 ```
 
 *NB:* Some email service provider ask to enable some settings to allow less secure apps. 
