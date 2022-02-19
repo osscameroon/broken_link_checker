@@ -38,12 +38,12 @@ def main(args):
             print(err)
             sys.exit(1)
 
-        defaults.update(dict(config_parser.items('config-broken-link')))
+        defaults.update(dict(config_parser.items('Checker')))
+        defaults.update(dict(config_parser.items('Notifier')))
 
     # parse the program's main arguments using the dictionary of defaults and
     # the previous parsers as "parent' parsers
     parser = ArgumentParser(
-        description="If the host is not specified, the conf.ini will be loaded",
         parents=[config_argparse])
     parser.set_defaults(**defaults)
     parser.add_argument('-H', '--host', type=str,
@@ -61,7 +61,7 @@ def main(args):
     args = parser.parse_args()
 
     # We verify the dependency
-    if (args.delay or args.smtp_server) and not args.host:
+    if not args.host:
         parser.error('host is required')
     elif (args.sender or args.password or args.smtp_server or args.recipient)\
             and not (args.sender and args.password and args.smtp_server and args.recipient):
@@ -72,7 +72,7 @@ def main(args):
     # We initialize the checker
     checker = Checker(
         args.host,
-        delay=args.delay or 1.0,
+        delay=args.delay if args.delay is not None else 1.0,
     )
 
     # We initialize the notifier
@@ -94,7 +94,6 @@ def main(args):
         msg += '\n'.join(checker.broken_url)
 
         # We notify the admin
-        print(args.recipient)
         notifier.send(subject='Broken links found', body=msg, recipient=args.recipient)
     else:
         print('Broken links:\n' + '\n'.join(checker.broken_url))
