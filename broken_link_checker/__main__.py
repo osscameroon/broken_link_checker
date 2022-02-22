@@ -102,19 +102,21 @@ def main(args):
     logging.info('Checking of %s...' % args.host)
     checker.run()
 
-    # We verify if the email notifier is configured
-    # and broken links are found
-    if args.smtp_server and checker.broken_url:
-        # We build the report
-        msg = f"Hello, your website <{args.host}>"\
-            f" contains {len(checker.broken_url)} broken links:\n"
-        msg += '\n'.join(checker.broken_url)
+    # We build the report
+    msg = f"Hello, your website <{args.host}>"\
+        f" contains {len(checker.broken_url)} broken links:\n"
+    for data in checker.broken_url.items():
+        msg += ': '.join(data) + '\n'
+    if not checker.broken_url:
+        msg += "No broken url found"
 
+    # We verify if the email notifier is configured
+    if args.smtp_server:
         # We notify the admin
         logging.info('Sending of the report to %s...' % args.recipient)
         notifier.send(subject='Broken links found', body=msg, recipient=args.recipient)
     else:
-        print('Broken links:\n' + '\n'.join(checker.broken_url))
+        print(msg)
 
 
 if __name__ == '__main__':
