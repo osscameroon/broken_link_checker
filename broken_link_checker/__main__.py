@@ -36,6 +36,14 @@ def main(args):
         "recipient": None,
     }
 
+    if config_args.debug:
+        logging.basicConfig(
+            # filename='logging.log',
+            # encoding='utf-8',
+            level=logging.DEBUG,
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        )
+
     if config_args.config_file:
         logging.info('Loading of the config file...')
         try:
