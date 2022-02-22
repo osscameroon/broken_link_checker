@@ -10,13 +10,6 @@ from configparser import ConfigParser
 import sys
 import logging
 
-logging.basicConfig(
-    # filename='logging.log',
-    # encoding='utf-8',
-    level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-
 
 def main(args):
     """Do something."""
@@ -25,6 +18,10 @@ def main(args):
     config_argparse = ArgumentParser(add_help=False)
     config_argparse.add_argument('-c', '--config-file',
                                  help='path to configuration file')
+    config_argparse.add_argument('-D', '--debug',
+                                 help='enable the debug mode',
+                                 type=bool,
+                                 default=False)
     config_args, _ = config_argparse.parse_known_args(args)
 
     defaults = {
