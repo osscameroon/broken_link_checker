@@ -57,5 +57,11 @@ python broken_link_checker https://example.com --delay 1 --sender <sender_email_
 
 *NB:* Some email service provider ask to enable some settings to allow less secure apps. 
 
+If you want run the tests, use this command
+
+```bash
+python3 -m unittest tests
+```
+
 # License
 MIT
