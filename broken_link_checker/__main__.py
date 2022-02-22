@@ -8,6 +8,14 @@ from checker import Checker
 from notifier import Notifier
 from configparser import ConfigParser
 import sys
+import logging
+
+logging.basicConfig(
+    # filename='logging.log',
+    # encoding='utf-8',
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 
 
 def main(args):
@@ -29,6 +37,7 @@ def main(args):
     }
 
     if config_args.config_file:
+        logging.info('Loading of the config file...')
         try:
             config_parser = ConfigParser()
             with open(config_args.config_file) as f:
@@ -83,6 +92,7 @@ def main(args):
     )
 
     # We start the checker
+    logging.info('Checking of %s...' % args.host)
     checker.run()
 
     # We verify if the email notifier is configured
@@ -94,6 +104,7 @@ def main(args):
         msg += '\n'.join(checker.broken_url)
 
         # We notify the admin
+        logging.info('Sending of the report to %s...' % args.recipient)
         notifier.send(subject='Broken links found', body=msg, recipient=args.recipient)
     else:
         print('Broken links:\n' + '\n'.join(checker.broken_url))
