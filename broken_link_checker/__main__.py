@@ -10,6 +10,13 @@ from configparser import ConfigParser
 import sys
 import logging
 
+logging.basicConfig(
+    # filename='logging.log',
+    # encoding='utf-8',
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
 
 def main(args):
     """Do something."""
@@ -33,13 +40,8 @@ def main(args):
         "recipient": None,
     }
 
-    if config_args.debug:
-        logging.basicConfig(
-            # filename='logging.log',
-            # encoding='utf-8',
-            level=logging.DEBUG,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        )
+    if not config_args.debug:
+        logging.disable(logging.CRITICAL)
 
     if config_args.config_file:
         logging.info('Loading of the config file...')
