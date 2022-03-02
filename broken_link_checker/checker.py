@@ -51,7 +51,7 @@ class Checker:
         self.checked_url = []
 
         # Will represent the list of broken URL
-        self.broken_url = []
+        self.broken_url = {}
 
         # Represent a regex to find all link URLs inside an text source
         self.REGEX_TEXT_URL = re.compile(
@@ -102,7 +102,7 @@ class Checker:
         if response.status == 200:
             return response
         else:
-            self.broken_url.append(url)
+            self.broken_url[url] = response.reason
             self.logging.warning(
                 '%s maybe broken because status code: %i' %
                 (url, response.status)
