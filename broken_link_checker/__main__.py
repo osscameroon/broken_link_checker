@@ -105,9 +105,11 @@ def main(args):
     # We build the report
     msg = f"Hello, your website <{args.host}>"\
         f" contains {len(checker.broken_url)} broken links:\n"
-    for data in checker.broken_url.items():
-        msg += ': '.join(data) + '\n'
-    if not checker.broken_url:
+
+    if checker.broken_url:
+        for data in checker.broken_url.items():
+            msg += ': '.join(data) + '\n'
+    else:
         msg += "No broken url found"
 
     # We verify if the email notifier is configured
