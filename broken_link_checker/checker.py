@@ -23,6 +23,11 @@ class Checker:
 
     def __init__(self, host: str, delay: int = 1):
         """Init the checker."""
+        # We config the logger
+        self.logging = logging.getLogger('checker')
+        self.logging.setLevel(logging.DEBUG)
+        self.logging.debug('We initialize the checker for %s' % host)
+
         # We config the connection
         self.conn = urllib3.connection_from_url(
             host,
@@ -83,7 +88,7 @@ class Checker:
         if url in self.checked_url:
             return
 
-        print('[INFO] Checking of %s...' % url)
+        self.logging.info('Checking of %s...' % url)
 
         # We make a connection
         response = self.conn.request(
@@ -96,24 +101,24 @@ class Checker:
         if response.status == 200:
             # We verify if the content is a webpage
             if self.REGEX_CONTENT_TYPE.match(response.headers['Content-Type']):
-                # print('[DEBUG] Getting of the webpage...')
+                self.logging.debug('Getting of the webpage...')
                 # we read max 2**20 bytes by precaution
                 data = response.read(1048576)
-                # print('[DEBUG] Getting of the URLs...')
+                self.logging.debug('Getting of the URLs...')
                 # We update the list of URL to check
                 self.update_list(url, data.decode())
 
                 # We close the connection
                 response.close()
             else:
-                print(
-                    '[WARNING] %s ignored because Content-Type %s' %
+                self.logging.warning(
+                    '%s ignored because Content-Type %s' %
                     (url, response.headers['Content-Type'])
                 )
         else:
             self.broken_url.append(url)
-            print(
-                '[WARNING] %s maybe broken because status code: %i' %
+            self.logging.warning(
+                '%s maybe broken because status code: %i' %
                 (url, response.status)
             )
 
@@ -157,7 +162,7 @@ class Checker:
                         continue
                 # 2
                 else:
-                    # print('[WARNING] the URL %s don\'t belong the host'%url)
+                    self.logging.warning('the URL %s don\'t belong the host' % url)
                     continue
 
             # At this point, the URL belongs to the HOST
@@ -165,7 +170,7 @@ class Checker:
             if url not in self.url_to_check \
                 and url not in self.checked_url \
                     and url != parent_url:
-                print('[INFO] Add the URL %s' % url)
+                self.logging.debug('Add the URL %s' % url)
                 self.url_to_check.append(url)
             else:
                 continue
