@@ -133,7 +133,11 @@ class Checker:
             # 2. The URL don't belongs to the HOST
             for match in matches:
                 # We get the URL match
-                url = [i for i in match if i][0]
+                url = [i for i in match if i]
+                if url:
+                    url = url[0]
+                else:
+                    continue
 
                 # 1.1
                 if self.conn.is_same_host(url):
