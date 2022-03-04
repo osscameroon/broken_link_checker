@@ -51,7 +51,7 @@ class Checker:
         self.checked_url = []
 
         # Will represent the list of broken URL
-        self.broken_url = []
+        self.broken_url = {}
 
         # Represent a regex to find all link URLs inside an text source
         self.REGEX_TEXT_URL = re.compile(
@@ -73,12 +73,10 @@ class Checker:
             re.IGNORECASE
         )
 
-    def check(self, url: str) -> None:
+    def check(self, url: str) -> urllib3.response.HTTPResponse | None:
         """
         Verify if a link is broken of not.
 
-        If not broken and is webpage, update the list of URL
-         to check with the child links of this link
         :url represent the URL to check
         """
         # We get only the path part
@@ -86,9 +84,12 @@ class Checker:
 
         # We verify the URL is already checked
         if url in self.checked_url:
-            return
+            return None
 
         self.logging.info('Checking of %s...' % url)
+
+        # We mark the URL checked
+        self.checked_url.append(url)
 
         # We make a connection
         response = self.conn.request(
@@ -99,85 +100,85 @@ class Checker:
 
         # We verify the response status
         if response.status == 200:
-            # We verify if the content is a webpage
-            if self.REGEX_CONTENT_TYPE.match(response.headers['Content-Type']):
-                self.logging.debug('Getting of the webpage...')
-                # we read max 2**20 bytes by precaution
-                data = response.read(1048576)
-                self.logging.debug('Getting of the URLs...')
-                # We update the list of URL to check
-                self.update_list(url, data.decode())
-
-                # We close the connection
-                response.close()
-            else:
-                self.logging.warning(
-                    '%s ignored because Content-Type %s' %
-                    (url, response.headers['Content-Type'])
-                )
+            return response
         else:
-            self.broken_url.append(url)
+            self.broken_url[url] = response.reason
             self.logging.warning(
                 '%s maybe broken because status code: %i' %
                 (url, response.status)
             )
+            return None
 
-        # We mark the URL checked
-        self.checked_url.append(url)
-
-    def update_list(self, parent_url: str, data: str) -> None:
+    def update_list(self, response: urllib3.response.HTTPResponse) -> None:
         """
         Update the list of URL to checked in function of the URL get in a webpage.
 
-        :parent_url represent the parent of these URL
-        It need for the conversion of relative URL to absolute URL
-        :data represent the code source of the parent URL
+        :response represent the http response who contains the data to analyze
         """
-        matches = self.REGEX_TEXT_URL.findall(data)
+        # We verify if the content is a webpage
+        if self.REGEX_CONTENT_TYPE.match(response.headers['Content-Type']):
+            self.logging.debug('Getting of the webpage...')
+            # we read max 2**20 bytes by precaution
+            data = response.read(1048576)
+            self.logging.debug('Decoding of data...')
+            data = data.decode()
+            self.logging.debug('Getting of the URLs...')
 
-        # In this step, we have two possibilities
-        # 1. The URL belongs to the HOST
-        # 1.1. The URL is absolute
-        # 1.2. The URL is relative
-        # 2. The URL don't belongs to the HOST
-        for match in matches:
-            # We get the URL match
-            url = [i for i in match if i][0]
+            matches = self.REGEX_TEXT_URL.findall(data)
 
-            # 1.1
-            if self.conn.is_same_host(url):
-                pass
-            # 1.2 and 2
-            else:
-                # 1.2
-                if not urllib3.util.parse_url(url).scheme:
-                    # We verify if the URL is different of the parent
-                    if not url.startswith('#') and not url.startswith('?'):
-                        # We build the absolute URL
-                        url = urljoin(parent_url, url)
-                    else:
-                        # Since this URL is relative
-                        # maybe it is not different of the parent
-                        # Eg: /home and /home#
-                        continue
-                # 2
+            # In this step, we have two possibilities
+            # 1. The URL belongs to the HOST
+            # 1.1. The URL is absolute
+            # 1.2. The URL is relative
+            # 2. The URL don't belongs to the HOST
+            for match in matches:
+                # We get the URL match
+                url = [i for i in match if i][0]
+
+                # 1.1
+                if self.conn.is_same_host(url):
+                    pass
+                # 1.2 and 2
                 else:
-                    self.logging.warning('the URL %s don\'t belong the host' % url)
+                    # 1.2
+                    if not urllib3.util.parse_url(url).scheme:
+                        # We verify if the URL is different of the parent
+                        if not url.startswith('#') and not url.startswith('?'):
+                            # We build the absolute URL
+                            url = urljoin(response._request_url, url)
+                        else:
+                            # Since this URL is relative
+                            # maybe it is not different of the parent
+                            # Eg: /home and /home#
+                            continue
+                    # 2
+                    else:
+                        self.logging.warning('the URL %s don\'t belong the host' % url)
+                        continue
+
+                # At this point, the URL belongs to the HOST
+                # We verify that the URL is neither already added nor checked
+                if url not in self.url_to_check \
+                    and url not in self.checked_url \
+                        and url != response._request_url:
+                    self.logging.debug('Add the URL %s' % url)
+                    self.url_to_check.append(url)
+                else:
                     continue
 
-            # At this point, the URL belongs to the HOST
-            # We verify that the URL is neither already added nor checked
-            if url not in self.url_to_check \
-                and url not in self.checked_url \
-                    and url != parent_url:
-                self.logging.debug('Add the URL %s' % url)
-                self.url_to_check.append(url)
-            else:
-                continue
+            # We close the connection
+            response.close()
+        else:
+            self.logging.warning(
+                '%s ignored because Content-Type %s' %
+                (response._request_url, response.headers['Content-Type'])
+            )
 
     def run(self) -> None:
         """Run the checker."""
         # We check while we have an URL unchecked
         while (self.url_to_check):
-            self.check(self.url_to_check.pop(0))
+            response = self.check(self.url_to_check.pop(0))
+            if response:
+                self.update_list(response)
             time.sleep(self.delay)

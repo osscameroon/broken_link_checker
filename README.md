@@ -20,6 +20,8 @@ git clone https://github.com/osscameroon/broken_link_checker.git
 
 Create a virtual env:
 
+*NB: Compatibility Python3.10+*
+
 ```bash
 python3 -m venv blc_venv
 ```
