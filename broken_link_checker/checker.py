@@ -92,11 +92,15 @@ class Checker:
         self.checked_url.append(url)
 
         # We make a connection
-        response = self.conn.request(
-            'GET',
-            url,
-            preload_content=False
-        )
+        try:
+            response = self.conn.request(
+                'GET',
+                url,
+                preload_content=False
+            )
+        except urllib3.exceptions.MaxRetryError:
+            self.broken_url[url] = 'max retry'
+            return
 
         # We verify the response status
         if response.status == 200:
