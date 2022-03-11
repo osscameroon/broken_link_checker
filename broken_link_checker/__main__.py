@@ -99,8 +99,9 @@ def main(args):
         broken_url[target] = {}
         checker.broken_url = broken_url[target]
 
-        checker_threads.append(threading.Thread(target=checker.run))
-        checker_threads[-1].daemon = True
+        t = threading.Thread(target=checker.run)
+        checker_threads.append(t)
+        t.daemon = True
 
     # We initialize the notifier
     notifier = Notifier(
