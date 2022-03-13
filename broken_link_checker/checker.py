@@ -24,7 +24,7 @@ class Checker:
     def __init__(self, host: str, delay: int = 1):
         """Init the checker."""
         # We config the logger
-        self.logging = logging.getLogger('checker')
+        self.logging = logging.getLogger(f'checker({host})')
         self.logging.setLevel(logging.DEBUG)
         self.logging.debug('We initialize the checker for %s' % host)
 

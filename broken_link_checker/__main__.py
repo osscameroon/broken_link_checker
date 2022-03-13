@@ -9,6 +9,7 @@ from notifier import Notifier
 from configparser import ConfigParser
 import sys
 import logging
+import threading
 
 logging.basicConfig(
     filename='logging.log',
@@ -85,11 +86,22 @@ def main(args):
     else:
         pass
 
-    # We initialize the checker
-    checker = Checker(
-        args.host,
-        delay=args.delay if args.delay is not None else 1.0,
-    )
+    checker_threads = []
+    broken_url = {}
+
+    for target in args.host.split(','):
+        # We initialize the checker
+        checker = Checker(
+            target,
+            delay=args.delay if args.delay is not None else 1.0,
+        )
+        # We config the shared dict
+        broken_url[target] = {}
+        checker.broken_url = broken_url[target]
+
+        t = threading.Thread(target=checker.run)
+        checker_threads.append(t)
+        t.daemon = True
 
     # We initialize the notifier
     notifier = Notifier(
@@ -98,19 +110,23 @@ def main(args):
         password=args.password,
     )
 
-    # We start the checker
-    logging.info('Checking of %s...' % args.host)
-    checker.run()
+    # We start the checkers
+    for thread in checker_threads:
+        logging.info('Checking of %s' % args.host)
+        thread.start()
+
+    # We wait for the completion
+    [thread.join() for thread in checker_threads]
 
     # We build the report
-    msg = f"Hello, your website <{args.host}>"\
-        f" contains {len(checker.broken_url)} broken links:\n"
-
-    if checker.broken_url:
-        for data in checker.broken_url.items():
-            msg += ': '.join(data) + '\n'
-    else:
-        msg += "No broken url found"
+    msg = 'Hello, the report of the broken link checker is ready.\n'
+    for target in broken_url:
+        msg += f"Report of {target}:\n"
+        if broken_url[target]:
+            for data in broken_url[target].items():
+                msg += ': '.join(data) + '\n'
+        else:
+            msg += "No broken url found\n"
 
     # We verify if the email notifier is configured
     if args.smtp_server:
