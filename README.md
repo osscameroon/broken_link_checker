@@ -10,6 +10,13 @@ This project aims to build a Web service that takes the URL, browse all the webs
 # Labels
 This is a console project that will run as a cron job.
 
+
+# Requirements
+
+- Make (optionnal)
+- Python3 (3.10 recommended)
+
+
 # Running the Project Locally
 
 First, clone the repository to your local machine:
@@ -36,6 +43,11 @@ source blc_venv/bin/activate
 blc_venv\Scripts\activate.bat
 ```
 
+Or using make:
+```
+make venv
+```
+
 Install dependency:
 
 ```bash
@@ -43,11 +55,21 @@ pip install --upgrade pip
 pip install -r broken_link_checker/requirements.txt
 ```
 
+Or using make
+```
+make install-deps
+```
+
 Finally, run:
 
 ```bash
 cd broken_link_checker
 python broken_link_checker https://example.com --delay 1
+```
+
+Or using make
+```
+make run link=http://127.0.0.1
 ```
 
 To receive a report by email, you can use this command
