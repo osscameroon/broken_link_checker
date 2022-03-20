@@ -4,8 +4,8 @@
 
 
 from argparse import ArgumentParser
-from checker import Checker
-from notifier import Notifier
+from .checker import Checker
+from .notifier import Notifier
 from configparser import ConfigParser
 import sys
 import logging

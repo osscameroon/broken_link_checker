@@ -12,12 +12,6 @@ This is a console project that will run as a cron job.
 
 # Running the Project Locally
 
-First, clone the repository to your local machine:
-
-```bash
-git clone https://github.com/osscameroon/broken_link_checker.git
-```
-
 Create a virtual env:
 
 *NB: Compatibility Python3.10+*
@@ -40,41 +34,34 @@ Install dependency:
 
 ```bash
 pip install --upgrade pip
-pip install -r src/broken_link_checker/requirements.txt
+pip install -i https://test.pypi.org/simple/ blc
 ```
 
 Finally, run:
 
 ```bash
-cd broken_link_checker
-python src/broken_link_checker https://example.com --delay 1
+python -m broken_link_checker https://example.com --delay 1
 ```
 
 To receive a report by email, you can use this command
 
 ```bash
-python src/broken_link_checker --host https://example.com --delay 1 --sender <sender_email_address>\
+python -m broken_link_checker --host https://example.com --delay 1 --sender <sender_email_address>\
  --password <sender_password> --smptp_server <smtp_server:port> --recipient <recipient_email_address>
 ```
 
 If also possible to specify a config file
-NB: Refer to our default config file *broken_link_checker/src/conf.ini* to know how to write it.
+NB: Refer to our default config file *broken_link_checker/conf.ini* to knw how to write it.
 ```bash
-cp src/broken_link_checker/example.conf.ini conf.ini
+cp example.conf.ini conf.ini
 ```
 
 Apply your modifications and run the program
 ```bash
-python src/broken_link_checker -c conf.ini
+python -m broken_link_checker -c conf.ini
 ```
 
 *NB:* Some email service provider ask to enable some settings to allow less secure apps. 
-
-If you want run the tests, use this command
-
-```bash
-python3 -m unittest tests
-```
 
 # License
 MIT
