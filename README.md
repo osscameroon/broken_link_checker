@@ -53,7 +53,7 @@ python src/broken_link_checker https://example.com --delay 1
 To receive a report by email, you can use this command
 
 ```bash
-python src/broken_link_checker --host https://example.com --delay 1 --sender <sender_email_address>\
+python src/broken_link_checker https://example.com --delay 1 --sender <sender_email_address>\
  --password <sender_password> --smptp_server <smtp_server:port> --recipient <recipient_email_address>
 ```
 
