@@ -124,7 +124,7 @@ def main(args):
         msg += f"Report of {target}:\n"
         if broken_url[target]:
             for data in broken_url[target].items():
-                msg += ': '.join(data) + '\n'
+                msg += str(data) + '\n'
         else:
             msg += "No broken url found\n"
 
