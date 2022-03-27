@@ -103,10 +103,11 @@ class Checker:
             return
 
         # We verify the response status
-        if response.status == 200:
-            return response
+        # 2xx stand for request was successfully completed
+        if int(response.status / 100) == 2:
+            return response if self.conn.is_same_host(url) else None
         else:
-            self.broken_url[url] = response.reason
+            self.broken_url[url] = response.status
             self.logging.warning(
                 '%s maybe broken because status code: %i' %
                 (url, response.status)
