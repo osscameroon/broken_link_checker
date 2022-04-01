@@ -77,6 +77,8 @@ def main(args):
                         help='It represent the email server used to send the report')
     parser.add_argument('-r', '--recipient', type=str,
                         help='It represent the email where send the report')
+    parser.add_argument('-n', '--deep-scan', type=bool,
+                        help='Enable the deep scan')
     args = parser.parse_args()
 
     # We verify the dependency
@@ -96,6 +98,7 @@ def main(args):
         checker = Checker(
             target,
             delay=args.delay if args.delay is not None else 1.0,
+            deep_scan=args.deep_scan,
         )
         # We config the shared dict
         broken_url[target] = {}

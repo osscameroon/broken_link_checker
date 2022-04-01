@@ -19,9 +19,11 @@ class Checker:
 
     :host represent the website to check
     :delay represent the delay between each request
+    :deep_scan enable the check of foreign url
+        just verify the availability of these URL
     """
 
-    def __init__(self, host: str, delay: int = 1):
+    def __init__(self, host: str, delay: int = 1, deep_scan=False):
         """Init the checker."""
         # We config the logger
         self.logging = logging.getLogger(f'checker({host})')
@@ -43,6 +45,9 @@ class Checker:
 
         # Delay between each request
         self.delay = delay
+
+        # Shallow scan of foreign url
+        self.deep_scan = deep_scan
 
         # Will represent the list of URL to check
         self.url_to_check = ['/']
@@ -79,8 +84,8 @@ class Checker:
 
         :url represent the URL to check
         """
-        # We get only the path part
-        url = parse_url(url).path or '/'
+        # We get only the path part if is same host
+        url = (parse_url(url).path or '/') if self.conn.is_same_host(url) else url
 
         # We verify the URL is already checked
         if url in self.checked_url:
@@ -93,13 +98,31 @@ class Checker:
 
         # We make a connection
         try:
-            response = self.conn.request(
-                'GET',
-                url,
-                preload_content=False
-            )
+            if self.conn.is_same_host(url):
+                response = self.conn.request(
+                    'GET',
+                    url,
+                    preload_content=False
+                )
+            else:
+                tmp_conn = urllib3.connection_from_url(
+                    url,
+                    # We config the timeout
+                    timeout=self.conn.timeout,
+                    headers=self.conn.headers,
+                    # We config the max number of connection
+                    maxsize=1,
+                )
+                response = tmp_conn.request(
+                    'HEAD',
+                    '/',
+                    preload_content=False
+                )
         except urllib3.exceptions.MaxRetryError:
             self.broken_url[url] = 'max retry'
+            return
+        except urllib3.exceptions.ReadTimeoutError:
+            self.broken_url[url] = 'read timeout'
             return
 
         # We verify the response status
@@ -162,9 +185,23 @@ class Checker:
                             continue
                     # 2
                     else:
-                        self.logging.warning('the URL %s don\'t belong the host' % url)
-                        continue
+                        # The url don't belongs the host
+                        if self.deep_scan:
+                            data = parse_url(url)
+                            # Just the HTTP and HTTPS scheme will be allowed
+                            if data.scheme in ['http', 'https']:
+                                # We remove the useless part
+                                url = Url(
+                                    scheme=data.scheme,
+                                    host=data.host,
+                                    port=data.port,
+                                    path=data.path).url
+                            else:
+                                continue
+                        else:
+                            continue
 
+                # Except if the deep_scan is enable
                 # At this point, the URL belongs to the HOST
                 # We verify that the URL is neither already added nor checked
                 if url not in self.url_to_check \
