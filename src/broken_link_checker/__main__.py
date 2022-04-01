@@ -63,8 +63,10 @@ def main(args):
     parser = ArgumentParser(
         parents=[config_argparse])
     parser.set_defaults(**defaults)
-    parser.add_argument('-H', '--host', type=str,
-                        help='Eg: http://example.com')
+
+    if not defaults['host']:
+        parser.add_argument('host', type=str,
+                            help='Eg: http://example.com')
     parser.add_argument('-d', '--delay', type=float,
                         help='It represent the delay between each request')
     parser.add_argument('-s', '--sender', type=str,
