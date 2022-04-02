@@ -88,7 +88,7 @@ class MyServer(BaseHTTPRequestHandler):
             self.send_response(404)
             self.end_headers()
 
-    def do_HEAD(sefl):
+    def do_HEAD(self):
         """Permit to check the availability of the test server."""
         self.send_response(200)
         self.end_headers()
