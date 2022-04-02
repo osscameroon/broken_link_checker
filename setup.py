@@ -22,7 +22,7 @@ setup(
         classifiers=[
             "Topic :: Internet :: WWW/HTTP",
         ],
-        python_requires='>=3.9',
+        python_requires='>=3.8, <4',
         package_dir={"": "src"},
         data_files=[('doc', ['README-PYPI.md'])],
         url="https://github.com/osscameroon/broken_link_checker",
