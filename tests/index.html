@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Test Page</title>
+</head>
+<body>
+    <!-- Risk of recursive check -->
+    <!-- We represent the same URL -->
+    <a href="/">Hello, i am home</a>
+    <a href="/#2" id=2>Me again</a>
+    <a href="/#3?toto" id=3>Me again</a>
+    <a href="/home">Me again</a>
+    <a href="/home#">Me again</a>
+    <a href="/home?eee">Me again</a>
+    <a href="">Me again</a>
+    <a href="#5" id=5>Me again</a>
+    <!-- We are not broken -->
+    <a href="/200">I works!</a>
+    <a href="/201">I works too!</a>
+    <a href="/202">Me also!</a>
+    <a href="/203">Don't forgot me</a>
+    <!-- Redirection -->
+    <a href="/good">Unfortunately, I works!</a>
+    <a href="/bad">Me, No!</a>
+    <!-- We are broken -->
+    <a href="/abc">I am a 404 error</a>
+    <a href="/error">I am a 500 error</a>
+    <a href="/wait">Wait me forever</a>
+    <!-- Me, I am different -->
+    <!-- I am not broken -->
+    <!-- Why? https://searchfacts.com/url-trailing-slash -->
+    <!-- We want show the difference -->
+    <a href="/abc/">I works</a>
+    <!-- I am an empty page -->
+    <a href="/empty">Empty</a>
+    <!-- I am null -->
+    <a href="/null">I am null</a>
+    <!-- html page -->
+    <a href="/html">html</a>
+    <!-- rss page -->
+    <a href="/rss">rss</a>
+    <!-- html page -->
+    <a href="/html/">Another html</a>
+</body>
+</html>
