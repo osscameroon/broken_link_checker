@@ -78,7 +78,7 @@ class Checker:
             re.IGNORECASE
         )
 
-    def check(self, url: str) -> urllib3.response.HTTPResponse | None:
+    def check(self, url: str) -> urllib3.response.HTTPResponse:
         """
         Verify if a link is broken of not.
 
