@@ -3,7 +3,7 @@
 """Unit Test of the module checker."""
 
 import unittest
-from broken_link_checker.checker import Checker
+from src.broken_link_checker.checker import Checker
 
 
 class CheckerTest(unittest.TestCase):
@@ -49,12 +49,27 @@ class CheckerTest(unittest.TestCase):
 
     def test_update_list(self):
         """Test for the method update_list."""
-        checker = Checker('localhost')
-
-        with open('tests/data.html', 'r') as f1:
-            with open('tests/data2.html', 'r') as f2:
-                with open('tests/data.rss', 'r') as f3:
+        with open('tests/data.html', 'rb') as f1:
+            with open('tests/data2.html', 'rb') as f2:
+                with open('tests/data.rss', 'rb') as f3:
                     data = f1.read() + f2.read() + f3.read()
 
-        checker.update_list('/', data)
+        class Response:
+            headers = {'Content-Type': 'text/html'}
+            _request_url = '/'
+
+            def read(x):
+                return data
+
+            def close():
+                pass
+
+        # without deep mode
+        checker = Checker('localhost')
+        checker.update_list(Response)
         self.assertEqual(len(checker.url_to_check), 18)
+
+        # with deep mode
+        checker = Checker('localhost', deep_scan=True)
+        checker.update_list(Response)
+        self.assertEqual(len(checker.url_to_check), 36)
