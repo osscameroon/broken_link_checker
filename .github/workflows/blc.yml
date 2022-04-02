@@ -1,0 +1,34 @@
+on:
+
+  push:
+  
+  schedule:
+    - cron: "*/5 * * * *"
+
+name: CI
+
+jobs:
+
+  unittest:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+
+    - name: Install dependencies
+      run: ./.github/workflows/install_deps.sh
+
+    - name: Build
+      run:
+        ./.github/workflows/build.sh
+
+    - name: Run simple test
+      run: python -m unittest
+
+    - name: Run full test
+      run:
+        ./.github/workflows/test.sh
