@@ -4,14 +4,14 @@
 # NB: The purpose of this script is
 # to verify the working of the checker on a real web server.
 
-NB_BROKEN_LINK_EXPECTED=22
+NB_BROKEN_LINK_EXPECTED=23
 HOST=localhost
 PORT=8080
 counter=5
 
 start_server() {
     # We start the web server
-    python tests/server.py $HOST $PORT &
+    python3 tests/server.py $HOST $PORT &
     # We get his pid
     server_pid=$!
 
@@ -34,7 +34,7 @@ start_server() {
 
 # We start the test
 start_test() {
-    report=$(python -m broken_link_checker http://$HOST:$PORT -d 0 -D true)
+    report=$(python3 -m broken_link_checker http://$HOST:$PORT -d 0 -D true)
     nb_broken_link_got=$(expr $(echo "$report" | grep -c .) - 2)
     if [ ! $nb_broken_link_got -eq $NB_BROKEN_LINK_EXPECTED ]; then
         echo "$NB_BROKEN_LINK_EXPECTED broken links expected, but $nb_broken_link_got got"
