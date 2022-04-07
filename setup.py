@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-VERSION = '0.0.3'
+VERSION = '0.0.4'
 DESCRIPTION = 'Check the broken links on a website'
 
 with open('README-PYPI.md', 'r') as f:
