@@ -26,8 +26,7 @@ def main(args):
                                  help='path to configuration file')
     config_argparse.add_argument('-D', '--debug',
                                  help='enable the debug mode',
-                                 type=bool,
-                                 default=False)
+                                 action='store_true')
     config_args, _ = config_argparse.parse_known_args(args)
 
     defaults = {
@@ -75,7 +74,7 @@ def main(args):
                         help='It represent the email server used to send the report')
     parser.add_argument('-r', '--recipient', type=str,
                         help='It represent the email where send the report')
-    parser.add_argument('-n', '--deep-scan', type=bool,
+    parser.add_argument('-n', '--deep-scan', action='store_true',
                         help='Enable the deep scan')
     args = parser.parse_args()
 
