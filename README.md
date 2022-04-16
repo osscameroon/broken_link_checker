@@ -39,7 +39,7 @@ Install dependencies:
 ```bash
 pip install --upgrade pip
 pip install --upgrade build
-pip install urllib3
+pip install -r requirements.txt
 ```
 
 Build the package
