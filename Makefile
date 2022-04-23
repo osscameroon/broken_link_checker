@@ -3,12 +3,12 @@
 CONFIG_FILE=./conf.ini
 VENVPATH=blc_venv
 PYTHON=$(VENVPATH)/bin/python3
-PIP=$(VENVPATH)/bin/pip3
 
 venv: $(VENVPATH)/bin/activate
 $(VENVPATH)/bin/activate: requirements.txt
-	test -d $(VENVPATH) || python3 -m venv $(VENVPATH)
-	. $(VENVPATH)/bin/activate
+	test -d $(VENVPATH) || virtualenv -p python3 $(VENVPATH); \
+	. $(VENVPATH)/bin/activate; \
+	pip install -r requirements.txt
 
 $(CONFIG_FILE):
 	echo "[-] adding config file..."
@@ -16,17 +16,13 @@ $(CONFIG_FILE):
 
 ##install-deps: setup your dev environment
 install-deps: venv $(CONFIG_FILE)
-	$(PIP) install --upgrade pip
-	$(PIP) install -r requirements.txt
-	$(PIP) install flake8
-	$(PIP) install --upgrade build
 
-##run: run the api locally
+##run: run the api locally - ex: make run link="https://osscameroon.com"
 run: install-deps
-	$(PYTHON) broken_link_checker $(link) --delay 1
+	$(PYTHON) -m broken_link_checker $(link) --delay 1
 
 lint: install-deps venv
-	$(PYTHON) -m flake8 src --show-source --statistics
+	$(PYTHON) -m flake8 broken_link_checker --show-source --statistics
 
 build: install-deps
 	$(PYTHON) -m build
@@ -42,8 +38,7 @@ clean:
 	rm -rf $(VENVPATH) dist
 
 ##help: show help
-help : Makefile
+help: Makefile
 	@sed -n 's/^##//p' $<
 
-.PHONY : help venv install-deps test lint
-
+.PHONY: help venv install-deps test lint
