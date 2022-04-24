@@ -8,6 +8,7 @@ from urllib.parse import urljoin
 import time
 import logging
 import re
+import difflib
 
 # We change the log level for urllib3’s logger
 logging.getLogger("urllib3").setLevel(logging.WARNING)
@@ -57,6 +58,9 @@ class Checker:
 
         # Will represent the list of broken URL
         self.broken_url = {}
+
+        # Will represent the previous webpage content
+        self.prev_data = ''
 
         # Represent a regex to find all link URLs inside an text source
         self.REGEX_TEXT_URL = re.compile(
@@ -150,6 +154,17 @@ class Checker:
             data = response.read(1048576)
             self.logging.debug('Decoding of data...')
             data = data.decode()
+
+            # We verify if we are not already got this content in the previous request
+            if difflib.SequenceMatcher(None, data, self.prev_data).ratio() > 0.9:
+                self.logging.warning(
+                    response._request_url + 
+                    ' skipped because content similar at +90% with the previous URL.'
+                )
+                return
+            else:
+                self.prev_data = data
+
             self.logging.debug('Getting of the URLs...')
 
             matches = self.REGEX_TEXT_URL.findall(data)
