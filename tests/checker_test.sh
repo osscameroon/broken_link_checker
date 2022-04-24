@@ -50,6 +50,8 @@ stop_server() {
 
 if start_server; then
     start_test
+else
+    exit 1
 fi
 
 err_code=$?

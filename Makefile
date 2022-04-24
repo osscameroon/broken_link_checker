@@ -3,10 +3,11 @@
 CONFIG_FILE=./conf.ini
 VENVPATH=blc_venv
 PYTHON=$(VENVPATH)/bin/python3
+PIP=$(VENVPATH)/bin/pip
 
 venv: $(VENVPATH)/bin/activate
 $(VENVPATH)/bin/activate: requirements.txt
-	test -d $(VENVPATH) || virtualenv -p python3 $(VENVPATH); \
+	test -d $(VENVPATH) || python3 -m venv $(VENVPATH); \
 	. $(VENVPATH)/bin/activate; \
 	pip install -r requirements.txt
 
@@ -30,7 +31,8 @@ build: install-deps
 ##test: test your code
 test: build
 	$(PYTHON) -m unittest
-	$(PIP) install dist/blc-*.whl
+	ls dist/blc-*.whl | sort -r | grep . -m 1 > /tmp/last_package
+	$(PIP) install -r /tmp/last_package
 	PYTHON=$(PYTHON) NB_BROKEN_LINK_EXPECTED=22 sh tests/checker_test.sh
 	PYTHON=$(PYTHON) NB_BROKEN_LINK_EXPECTED=28 BLC_FLAGS="-D -n" sh tests/checker_test.sh
 
