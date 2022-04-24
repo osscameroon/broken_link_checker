@@ -34,7 +34,7 @@ test: build
 	ls dist/blc-*.whl | sort -r | grep . -m 1 > /tmp/last_package
 	$(PIP) install -r /tmp/last_package
 	PYTHON=$(PYTHON) NB_BROKEN_LINK_EXPECTED=23 sh tests/checker_test.sh
-	PYTHON=$(PYTHON) NB_BROKEN_LINK_EXPECTED=29 BLC_FLAGS="-D -n" sh tests/checker_test.sh
+	PYTHON=$(PYTHON) NB_BROKEN_LINK_EXPECTED=29 BLC_FLAGS="-n" sh tests/checker_test.sh
 
 clean:
 	rm -rf $(VENVPATH) dist
