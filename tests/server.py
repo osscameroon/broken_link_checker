@@ -80,6 +80,26 @@ class MyServer(BaseHTTPRequestHandler):
             self.send_response(301)
             self.send_header('Location', '/201')
             self.end_headers()
+        elif self.path == '/c/i/r/c/u/l/a/r':
+            self.send_response(301)
+            self.send_header('Location', '/')
+            self.end_headers()
+        elif self.path.startswith('/c/i/r/c/u/l/a/r/'):
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+            self.wfile.write(b"""
+                <!DOCTYPE html>
+                <html>
+                    <head></head>
+                <body>
+                    <a href="c/i/r/c/u/l/a/r/">
+                </body>
+                </html>""")
+        elif self.path == '/iredirect':
+            self.send_response(301)
+            self.send_header('Location', '/iredirect')
+            self.end_headers()
         elif self.path == '/bad':
             self.send_response(301)
             self.send_header('Location', '/401')
