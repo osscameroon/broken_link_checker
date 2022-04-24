@@ -19,16 +19,6 @@ jobs:
       with:
         fetch-depth: 1
 
-    - name: Install dependencies
-      run: ./.github/workflows/install_deps.sh
-
-    - name: Build
-      run:
-        ./.github/workflows/build.sh
-
-    - name: Run simple test
-      run: python -m unittest
-
     - name: Run full test
       run:
-        ./.github/workflows/test.sh
+        make test
