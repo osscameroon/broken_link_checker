@@ -37,23 +37,19 @@ source blc_venv/bin/activate
 
 Install dependencies:
 ```bash
-pip install --upgrade pip
-pip install --upgrade build
-pip install -r requirements.txt
+make install-deps
 ```
 
 Build the package
 ```bash
-python -m build
-pip uninstall blc
-pip install dist/blc-*-py3-none-any.whl
+make build
 ```
 
 For the next step confer *normal usage*
 
 If you want run the tests, use this command
 ```bash
-python3 -m unittest tests
+make test
 ```
 
 # License
