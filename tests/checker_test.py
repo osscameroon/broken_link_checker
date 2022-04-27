@@ -56,17 +56,19 @@ class CheckerTest(unittest.TestCase):
 
         class Response:
             headers = {'Content-Type': 'text/html'}
-            _request_url = '/'
+            url = 'http://localhost/'
 
-            def read(x):
-                return data
+            class raw:
+                def read(x):
+                    return data
 
             def close():
                 pass
 
         # without deep mode
-        checker = Checker('localhost')
+        checker = Checker(Response.url)
         checker.update_list(Response)
+
         self.assertEqual(len(checker.url_to_check), 18)
 
         # with deep mode

@@ -2,17 +2,15 @@
 # -*- coding: utf-8 -*-
 """Checker module."""
 
-import urllib3
-from urllib3.util import Timeout, parse_url, Url
+import requests
 from urllib.parse import urljoin
 import time
 import logging
 import re
 import difflib
-import http
 
-# We change the log level for urllib3’s logger
-logging.getLogger("urllib3").setLevel(logging.WARNING)
+# We change the log level for requests’s logger
+logging.getLogger("requests").setLevel(logging.WARNING)
 
 
 class Checker:
@@ -25,7 +23,7 @@ class Checker:
         just verify the availability of these URL
     """
 
-    def __init__(self, host: str, delay: int = 1, deep_scan=False):
+    def __init__(self, host: str, delay: int = 1, deep_scan: bool = False):
         """Init the checker."""
         # We config the logger
         self.logging = logging.getLogger(f'checker({host})')
@@ -33,17 +31,12 @@ class Checker:
         self.logging.debug('We initialize the checker for %s' % host)
 
         # We config the connection
-        self.conn = urllib3.connection_from_url(
-            host,
-            # We config the timeout
-            timeout=Timeout(connect=2.0, read=7.0),
-            headers=urllib3.util.make_headers(
-                user_agent="BrokenLinkChecker/1.0",
-                keep_alive=True
-            ),
-            # We config the max number of connection
-            maxsize=1,
-        )
+        self.conn = requests.session()
+        self.headers = {
+            "user_agent": "BrokenLinkChecker/1.0",
+        }
+
+        self.host = host
 
         # Delay between each request
         self.delay = delay
@@ -52,7 +45,7 @@ class Checker:
         self.deep_scan = deep_scan
 
         # Will represent the list of URL to check
-        self.url_to_check = ['/']
+        self.url_to_check = [host]
 
         # Will represent the list of checked URL
         self.checked_url = []
@@ -83,15 +76,30 @@ class Checker:
             re.IGNORECASE
         )
 
-    def check(self, url: str) -> urllib3.response.HTTPResponse:
+    def is_same_host(self, url):
+        """
+        Verify if the url belongs the host.
+
+        :url the url to verify
+        """
+        host = requests.utils.urlparse(self.host)
+        url = requests.utils.urlparse(url)
+
+        if not url.scheme:
+            return True
+        elif url.scheme == host.scheme\
+         and url.netloc == host.netloc\
+           and url.port == host.port:
+            return True
+        else:
+            return False
+
+    def check(self, url: str) -> requests.Response:
         """
         Verify if a link is broken of not.
 
         :url represent the URL to check
         """
-        # We get only the path part if is same host
-        url = (parse_url(url).path or '/') if self.conn.is_same_host(url) else url
-
         # We verify the URL is already checked
         if url in self.checked_url:
             return None
@@ -103,48 +111,31 @@ class Checker:
 
         # We make a connection
         try:
-            if self.conn.is_same_host(url):
-                response = self.conn.request(
-                    'GET',
-                    url,
-                    preload_content=False
-                )
+            if self.is_same_host(url):
+                response = self.conn.get(url, headers=self.headers, timeout=2, stream=True)
             else:
-                tmp_conn = urllib3.connection_from_url(
-                    url,
-                    # We config the timeout
-                    timeout=self.conn.timeout,
-                    headers=self.conn.headers,
-                    # We config the max number of connection
-                    maxsize=1,
-                )
-                response = tmp_conn.request(
-                    'HEAD',
-                    '/',
-                    preload_content=False
-                )
-        except urllib3.exceptions.MaxRetryError:
-            self.broken_url[url] = 'max retry'
-            return
-        except urllib3.exceptions.ReadTimeoutError:
-            self.broken_url[url] = 'read timeout'
-            return
-
-        # We verify the response status
-        # 2xx stand for request was successfully completed
-        if int(response.status / 100) == 2:
-            return response if self.conn.is_same_host(url) else None
+                response = self.conn.head(url, headers=self.headers, timeout=2)
+        except requests.exceptions.ReadTimeout:
+            self.broken_url[url] = "Timeout!"
+        except requests.exceptions.ConnectionError:
+            self.broken_url[url] = "Connection aborted!"
+        except requests.exceptions.TooManyRedirects:
+            self.broken_url[url] = "Too many redirection!"
         else:
-            reason = [i.description for i in http.HTTPStatus if i.value == response.status]
-            self.broken_url[url] = reason[0] if reason else response.status
+            # We verify the response status
+            # 2xx stand for request was successfully completed
+            if response.ok:
+                return response if self.is_same_host(url) else None
+            else:
+                self.broken_url[url] = response.reason
 
-            self.logging.warning(
-                '%s maybe broken because status code: %i' %
-                (url, response.status)
-            )
-            return None
+                self.logging.warning(
+                    '%s maybe broken because status code: %i' %
+                    (url, response.status_code)
+                )
+                return None
 
-    def update_list(self, response: urllib3.response.HTTPResponse) -> None:
+    def update_list(self, response: requests.Response) -> None:
         """
         Update the list of URL to checked in function of the URL get in a webpage.
 
@@ -154,14 +145,14 @@ class Checker:
         if self.REGEX_CONTENT_TYPE.match(response.headers['Content-Type']):
             self.logging.debug('Getting of the webpage...')
             # we read max 2**20 bytes by precaution
-            data = response.read(1048576)
+            data = response.raw.read(1048576)
             self.logging.debug('Decoding of data...')
             data = data.decode()
 
             # We verify if we are not already got this content in the previous request
             if difflib.SequenceMatcher(None, data, self.prev_data).ratio() > 0.9:
                 self.logging.warning(
-                    response._request_url + 
+                    response.url + 
                     ' skipped because content similar at +90% with the previous URL.'
                 )
                 return
@@ -185,46 +176,39 @@ class Checker:
                 else:
                     continue
 
-                # 1.1
-                if self.conn.is_same_host(url):
-                    pass
-                # 1.2 and 2
-                else:
+                # 1.1 and 1.2
+                if self.is_same_host(url):
                     # 1.2
-                    if not urllib3.util.parse_url(url).scheme:
+                    if not requests.utils.parse_url(url).scheme:
                         # We verify if the URL is different of the parent
                         if not url.startswith('#') and not url.startswith('?'):
                             # We build the absolute URL
-                            url = urljoin(response._request_url, url)
+                            url = urljoin(response.url, url)
                         else:
                             # Since this URL is relative
                             # maybe it is not different of the parent
                             # Eg: /home and /home#
                             continue
-                    # 2
                     else:
-                        # The url don't belongs the host
-                        if self.deep_scan:
-                            data = parse_url(url)
-                            # Just the HTTP and HTTPS scheme will be allowed
-                            if data.scheme in ['http', 'https']:
-                                # We remove the useless part
-                                url = Url(
-                                    scheme=data.scheme,
-                                    host=data.host,
-                                    port=data.port,
-                                    path=data.path).url
-                            else:
-                                continue
-                        else:
-                            continue
+                        # 1.1
+                        pass
+                # 2
+                elif self.deep_scan:
+                    data = requests.utils.urlparse(url)
+                    # Just the HTTP and HTTPS scheme will be allowed
+                    if data.scheme in ['http', 'https']:
+                        pass
+                    else:
+                        continue
+                else:
+                    continue
 
                 # Except if the deep_scan is enable
                 # At this point, the URL belongs to the HOST
                 # We verify that the URL is neither already added nor checked
                 if url not in self.url_to_check \
                     and url not in self.checked_url \
-                        and url != response._request_url:
+                        and url != response.url:
                     self.logging.debug('Add the URL %s' % url)
                     self.url_to_check.append(url)
                 else:
@@ -235,7 +219,7 @@ class Checker:
         else:
             self.logging.warning(
                 '%s ignored because Content-Type %s' %
-                (response._request_url, response.headers['Content-Type'])
+                (response.url, response.headers['Content-Type'])
             )
 
     def run(self) -> None:
