@@ -9,7 +9,6 @@ venv: $(VENVPATH)/bin/activate
 $(VENVPATH)/bin/activate: requirements.txt
 	test -d $(VENVPATH) || python3 -m venv $(VENVPATH); \
 	. $(VENVPATH)/bin/activate; \
-	pip install -r requirements.txt
 
 $(CONFIG_FILE):
 	echo "[-] adding config file..."
@@ -17,12 +16,13 @@ $(CONFIG_FILE):
 
 ##install-deps: setup your dev environment
 install-deps: venv $(CONFIG_FILE)
+	$(PIP) install -r requirements.txt
 
 ##run: run the api locally - ex: make run link="https://osscameroon.com"
 run: install-deps
 	$(PYTHON) -m broken_link_checker $(link) --delay 1
 
-lint: install-deps venv
+lint: install-deps
 	$(PYTHON) -m flake8 broken_link_checker --show-source --statistics
 
 build: install-deps
