@@ -191,6 +191,7 @@ class Checker:
                         if not url.startswith('#') and not url.startswith('?'):
                             # We build the absolute URL
                             url = urljoin(response._request_url, url)
+                            url = self.conn._absolute_url(url)
                         else:
                             # Since this URL is relative
                             # maybe it is not different of the parent
