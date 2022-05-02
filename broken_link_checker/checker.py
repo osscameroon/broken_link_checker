@@ -9,7 +9,6 @@ import time
 import logging
 import re
 import difflib
-import http
 
 # We change the log level for urllib3’s logger
 logging.getLogger("urllib3").setLevel(logging.WARNING)
@@ -130,8 +129,7 @@ class Checker:
         if int(response.status / 100) == 2:
             return response if self.conn.is_same_host(url) else None
         else:
-            reason = [i.description for i in http.HTTPStatus if i.value == response.status]
-            self.broken_url[url] = reason[0] if reason else response.status
+            self.broken_url[url] = response.reason
 
             self.logging.warning(
                 '%s maybe broken because status code: %i' %
