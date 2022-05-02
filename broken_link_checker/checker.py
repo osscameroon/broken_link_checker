@@ -110,17 +110,12 @@ class Checker:
                     preload_content=False
                 )
             else:
-                tmp_conn = urllib3.connection_from_url(
+                response = urllib3.PoolManager(num_pools=1).request(
+                    'HEAD',
                     url,
                     # We config the timeout
                     timeout=self.conn.timeout,
                     headers=self.conn.headers,
-                    # We config the max number of connection
-                    maxsize=1,
-                )
-                response = tmp_conn.request(
-                    'HEAD',
-                    '/',
                     preload_content=False
                 )
         except urllib3.exceptions.MaxRetryError:
