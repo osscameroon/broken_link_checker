@@ -32,9 +32,9 @@ class Checker:
 
         # We config the connection
         self.conn = requests.session()
-        self.headers = {
-            "user_agent": "BrokenLinkChecker/1.0",
-        }
+        self.conn.headers.update({
+            "User-Agent": "BrokenLinkChecker/1.0",
+        })
 
         self.host = host
 
@@ -112,9 +112,9 @@ class Checker:
         # We make a connection
         try:
             if self.is_same_host(url):
-                response = self.conn.get(url, headers=self.headers, timeout=2, stream=True)
+                response = self.conn.get(url, timeout=2, stream=True)
             else:
-                response = self.conn.head(url, headers=self.headers, timeout=2)
+                response = self.conn.head(url, timeout=2)
         except requests.exceptions.ReadTimeout:
             self.broken_url[url] = "Timeout!"
         except requests.exceptions.ConnectionError:
