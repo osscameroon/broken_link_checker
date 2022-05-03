@@ -145,6 +145,7 @@ class Checker:
         if self.REGEX_CONTENT_TYPE.match(response.headers['Content-Type']):
             self.logging.debug('Getting of the webpage...')
             # we read max 2**20 bytes by precaution
+            response.raw.decode_content = True
             data = response.raw.read(1048576)
             self.logging.debug('Decoding of data...')
             data = data.decode()
