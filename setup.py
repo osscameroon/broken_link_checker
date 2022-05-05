@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-VERSION = '0.0.4'
+VERSION = '0.1.0'
 DESCRIPTION = 'Check the broken links on a website'
 
 with open('README-PYPI.md', 'r') as f:
@@ -17,7 +17,7 @@ setup(
         long_description=LONG_DESCRIPTION,
         long_description_content_type="text/markdown",
         packages=find_packages(where="src"),
-        install_requires=["urllib3"],
+        install_requires=["requests"],
         keywords=["link", "url", "broken", "check"],
         classifiers=[
             "Topic :: Internet :: WWW/HTTP",
