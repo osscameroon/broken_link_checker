@@ -12,54 +12,7 @@ This is a console project that will run as a cron job.
 
 # Running the Project Locally
 
-Create a virtual env:
-
-*NB: Compatibility Python3.10+*
-
-```bash
-python3 -m venv blc_venv
-```
-
-Active the virtual env:
-## Linux
-```bash
-source blc_venv/bin/activate
-```
-## Windows
-```cmd
-blc_venv\Scripts\activate.bat
-```
-
-Install dependency:
-
-```bash
-pip install --upgrade pip
-pip install -i https://test.pypi.org/simple/ blc
-```
-
-Finally, run:
-
-```bash
-python -m broken_link_checker https://example.com --delay 1
-```
-
-To receive a report by email, you can use this command
-
-```bash
-python -m broken_link_checker https://example.com --delay 1 --sender <sender_email_address>\
- --password <sender_password> --smptp_server <smtp_server:port> --recipient <recipient_email_address>
-```
-
-If also possible to specify a config file
-NB: Refer to our default config file *broken_link_checker/conf.ini* to knw how to write it.
-```bash
-cp example.conf.ini conf.ini
-```
-
-Apply your modifications and run the program
-```bash
-python -m broken_link_checker -c conf.ini
-```
+-- documentation need to be rite here for the Makefile -- 
 
 *NB:* Some email service provider ask to enable some settings to allow less secure apps. 
 
