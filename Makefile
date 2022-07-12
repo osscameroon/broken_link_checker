@@ -1,7 +1,6 @@
 .DEFAULT_GOAL=help
 
-CONFIG_FILE=./conf.ini
-VENVPATH=blc_venv
+VENVPATH=venv
 PYTHON=$(VENVPATH)/bin/python3
 PIP=$(VENVPATH)/bin/pip
 
@@ -11,30 +10,21 @@ $(VENVPATH)/bin/activate: requirements.txt
 	. $(VENVPATH)/bin/activate; \
 	$(PIP) install -r requirements.txt
 
-$(CONFIG_FILE):
-	echo "[-] adding config file..."
-	cp example.conf.ini $(CONFIG_FILE)
-
 ##install-deps: setup your dev environment
-install-deps: venv $(CONFIG_FILE)
+install-deps: venv
 
 ##run: run the api locally - ex: make run link="https://osscameroon.com"
 run: install-deps
-	$(PYTHON) -m broken_link_checker $(link) --delay 1
+	$(PYTHON) -m blc $(link)
 
 lint: install-deps
-	$(PYTHON) -m flake8 broken_link_checker --show-source --statistics
+	$(PYTHON) -m flake8 blc --show-source --statistics
 
 build: install-deps
 	$(PYTHON) -m build
 
 ##test: test your code
 test: build
-	$(PYTHON) -m unittest
-	ls dist/blc-*.whl | sort -r | grep . -m 1 > /tmp/last_package
-	$(PIP) install -r /tmp/last_package
-	PYTHON=$(PYTHON) NB_BROKEN_LINK_EXPECTED=23 sh tests/checker_test.sh
-	PYTHON=$(PYTHON) NB_BROKEN_LINK_EXPECTED=31 BLC_FLAGS="-n" sh tests/checker_test.sh
 
 clean:
 	rm -rf $(VENVPATH) dist

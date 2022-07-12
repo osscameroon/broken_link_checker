@@ -12,45 +12,9 @@ This is a console project that will run as a cron job.
 
 # Running the Project Locally
 
-## For normal usage
+-- documentation need to be rite here for the Makefile -- 
 
-[README](README-PYPI.md)
-
-## For developer only
-
-First, clone the repository to your local machine:
-```bash
-git clone https://github.com/osscameroon/broken_link_checker.git
-```
-
-Create a virtual env:
-
-*NB: Compatibility Python3.10+*
-```bash
-python3 -m venv blc_venv
-```
-
-Active the virtual env:
-```bash
-source blc_venv/bin/activate
-```
-
-Install dependencies:
-```bash
-make install-deps
-```
-
-Build the package
-```bash
-make build
-```
-
-For the next step confer *normal usage*
-
-If you want run the tests, use this command
-```bash
-make test
-```
+*NB:* Some email service provider ask to enable some settings to allow less secure apps. 
 
 # License
 MIT

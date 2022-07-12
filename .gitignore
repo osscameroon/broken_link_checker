@@ -1,6 +1,6 @@
-__pycache__
+*__pycache__
 *.pyc
-*.ini
 *.egg-info
+*.json
 dist
-blc_venv
+venv
