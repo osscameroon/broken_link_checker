@@ -40,13 +40,13 @@ pip install -i https://test.pypi.org/simple/ blc
 Finally, run:
 
 ```bash
-python -m broken_link_checker https://example.com --delay 1
+python -m blc https://example.com --delay 1
 ```
 
 To receive a report by email, you can use this command
 
 ```bash
-python -m broken_link_checker https://example.com --delay 1 --sender <sender_email_address>\
+python -m blc https://example.com --delay 1 --sender <sender_email_address>\
  --password <sender_password> --smptp_server <smtp_server:port> --recipient <recipient_email_address>
 ```
 
@@ -58,7 +58,7 @@ cp example.conf.ini conf.ini
 
 Apply your modifications and run the program
 ```bash
-python -m broken_link_checker -c conf.ini
+python -m blc -c conf.ini
 ```
 
 *NB:* Some email service provider ask to enable some settings to allow less secure apps. 

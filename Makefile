@@ -20,10 +20,10 @@ install-deps: venv $(CONFIG_FILE)
 
 ##run: run the api locally - ex: make run link="https://osscameroon.com"
 run: install-deps
-	$(PYTHON) -m broken_link_checker $(link) --delay 1
+	$(PYTHON) -m blc $(link) --delay 1
 
 lint: install-deps
-	$(PYTHON) -m flake8 broken_link_checker --show-source --statistics
+	$(PYTHON) -m flake8 blc --show-source --statistics
 
 build: install-deps
 	$(PYTHON) -m build
