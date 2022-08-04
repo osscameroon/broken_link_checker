@@ -3,7 +3,7 @@
 """Unit Test of the module checker."""
 
 import unittest
-from broken_link_checker.checker import Checker
+from blc.checker import Checker
 
 
 class CheckerTest(unittest.TestCase):
