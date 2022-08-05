@@ -8,3 +8,4 @@ pyflakes==2.4.0
 pyparsing==3.0.8
 tomli==2.0.1
 requests
+coloredlogs

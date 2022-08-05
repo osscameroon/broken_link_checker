@@ -10,6 +10,10 @@ from configparser import ConfigParser
 import sys
 import logging
 import threading
+import coloredlogs
+
+
+coloredlogs.install()
 
 logging.basicConfig(
     level=logging.DEBUG,
