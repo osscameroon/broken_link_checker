@@ -9,7 +9,7 @@ from .notifier import Notifier
 from configparser import ConfigParser
 import sys
 import logging
-import threading
+# import threading
 import coloredlogs
 
 
@@ -103,12 +103,18 @@ def main(args):
             delay=args.delay if args.delay is not None else 1.0,
             deep_scan=args.deep_scan,
         )
+        if conn:
+            checker.conn = conn
+        else:
+            conn = checker.conn
         # We config the shared dict
         report[target] = checker.urls
 
-        t = threading.Thread(target=checker.run)
-        checker_threads.append(t)
-        t.daemon = True
+        # t = threading.Thread(target=checker.run)
+        # checker_threads.append(t)
+        # t.daemon = True
+
+        checker.run()
 
     # We initialize the notifier
     notifier = Notifier(

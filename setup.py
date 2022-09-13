@@ -17,7 +17,7 @@ setup(
         long_description=LONG_DESCRIPTION,
         long_description_content_type="text/markdown",
         packages=find_packages(where="src"),
-        install_requires=["requests"],
+        install_requires=["requests-html", "coloredlogs"],
         keywords=["link", "url", "broken", "check"],
         classifiers=[
             "Topic :: Internet :: WWW/HTTP",

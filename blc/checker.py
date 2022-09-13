@@ -3,14 +3,16 @@
 """Checker module."""
 
 import requests
+import requests_html
 from urllib.parse import urljoin
 import time
 import logging
 import re
 import difflib
+import html
 
 # We change the log level for requests’s logger
-logging.getLogger("requests").setLevel(logging.WARNING)
+logging.getLogger("requests_html").setLevel(logging.WARNING)
 
 
 class Checker:
@@ -31,7 +33,7 @@ class Checker:
         self.logging.debug('We initialize the checker for %s' % host)
 
         # We config the connection
-        self.conn = requests.session()
+        self.conn = requests_html.HTMLSession()
         self.conn.headers.update({
             "User-Agent": "BrokenLinkChecker/1.0",
         })
@@ -98,7 +100,7 @@ class Checker:
         else:
             return False
 
-    def check(self, url: str) -> requests.Response:
+    def check(self, url: str) -> requests_html.HTMLResponse:
         """
         Verify if a link is broken of not.
 
@@ -139,7 +141,7 @@ class Checker:
                 )
                 return None
 
-    def update_list(self, response: requests.Response) -> None:
+    def update_list(self, response: requests_html.HTMLResponse) -> None:
         """
         Update the list of URL to checked
          in function of the URL get in a webpage.
@@ -149,11 +151,18 @@ class Checker:
         # We verify if the content is a webpage
         if self.REGEX_CONTENT_TYPE.match(response.headers['Content-Type']):
             self.logging.debug('Getting of the webpage...')
-            # we read max 2**20 bytes by precaution
-            response.raw.decode_content = True
-            data = response.raw.read(1048576)
-            self.logging.debug('Decoding of data...')
-            data = data.decode()
+            # We execute the js script
+            try:
+                # We wait 10s to load the js and in case of connection latency
+                response.html.render(timeout=10, sleep=10)
+            except (AttributeError, requests_html.etree.ParserError):
+                # we read max 2**20 bytes by precaution
+                response.raw.decode_content = True
+                data = response.raw.read(1048576)
+                self.logging.debug('Decoding of data...')
+                data = data.decode()
+            else:
+                data = response.html.html
 
             # We verify if we are not already got this content
             #   in the previous request
@@ -170,6 +179,9 @@ class Checker:
 
             self.logging.debug('Getting of the URLs...')
 
+            # Some url can be escape by the browser
+            data = html.unescape(data)
+            
             urls = [
                 ii for i in self.REGEX_TEXT_URL.findall(data)
                 if i for ii in i if ii
