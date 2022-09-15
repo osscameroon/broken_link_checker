@@ -69,9 +69,9 @@ class CheckerTest(unittest.TestCase):
         checker = Checker(Response.url)
         checker.update_list(Response)
 
-        self.assertEqual(len(checker.url_to_check), 18)
+        self.assertEqual(len(checker.urls), 18)
 
         # with deep mode
         checker = Checker('localhost', deep_scan=True)
         checker.update_list(Response)
-        self.assertEqual(len(checker.url_to_check), 36)
+        self.assertEqual(len(checker.urls), 36)
