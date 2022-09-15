@@ -103,7 +103,7 @@ class Checker:
         :url represent the URL to check
         """
         # We verify the URL is already checked
-        if [u for u in self.urls if self.urls[u]['result'] and url == u]:
+        if self.urls[url]['result']:
             return None
 
         self.logging.info('Checking of %s...' % url)
@@ -235,12 +235,10 @@ class Checker:
         while 1:
             url_to_check = [u for u in self.urls if not self.urls[u]['result']]
             
-            if url_to_check:
-                pass
-            else:
+            if not url_to_check:
                 break
 
-            while (url_to_check):
+            while url_to_check:
                 url = url_to_check.pop(0)
                 self.urls[url]['check_time'] = time.time()
                 response = self.check(url)

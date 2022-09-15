@@ -135,7 +135,7 @@ def main(args):
                     f"URL:        {url}\n"\
                     f"Parent URL: {info['parent']}\n"\
                     f"Real URL:   {info['url']}\n"\
-                    f"Check time: {info['check_time']} seconds\n"\
+                    f"Check time: {round(info['check_time'], 4)} seconds\n"\
                     f"Result:     {info['result'][1]} -> {info['result'][2]}\n"
                     acc += 1
                 else:
