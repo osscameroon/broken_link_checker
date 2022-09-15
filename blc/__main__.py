@@ -92,7 +92,7 @@ def main(args):
         pass
 
     checker_threads = []
-    broken_url = {}
+    report = {}
 
     for target in args.host.split(','):
         # We initialize the checker
@@ -102,8 +102,7 @@ def main(args):
             deep_scan=args.deep_scan,
         )
         # We config the shared dict
-        broken_url[target] = {}
-        checker.broken_url = broken_url[target]
+        report[target] = checker.urls
 
         t = threading.Thread(target=checker.run)
         checker_threads.append(t)
@@ -126,19 +125,31 @@ def main(args):
 
     # We build the report
     msg = 'Hello, the report of the broken link checker is ready.\n'
-    for target in broken_url:
-        msg += f"Report of {target}:\n"
-        if broken_url[target]:
-            for data in broken_url[target].items():
-                msg += str(data) + '\n'
+    for target in report:
+        msg += f"--------------\nReport of {target}\n--------------"
+        if report[target]:
+            acc = 0
+            for url, info in report[target].items():
+                if not info['result'][0]:
+                    msg += "\n"\
+                    f"URL:        {url}\n"\
+                    f"Parent URL: {info['parent']}\n"\
+                    f"Real URL:   {info['url']}\n"\
+                    f"Check time: {info['check_time']} seconds\n"\
+                    f"Result:     {info['result'][1]} -> {info['result'][2]}\n"
+                    acc += 1
+                else:
+                    pass
+            msg += f"\nThats it. {acc} errors in {len(report[target])} links found.\n"\
+            "--------------\n\n"
         else:
-            msg += "No broken url found\n"
+            pass
 
     # We verify if the email notifier is configured
     if args.smtp_server:
         # We notify the admin
         logging.info('Sending of the report to %s...' % args.recipient)
-        notifier.send(subject='Broken links found', body=msg, recipient=args.recipient)
+        notifier.send(subject='Broken links found', body=msg or "No broken url found\n", recipient=args.recipient)
     else:
         print(msg)
 

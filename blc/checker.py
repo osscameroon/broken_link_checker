@@ -44,14 +44,16 @@ class Checker:
         # Shallow scan of foreign url
         self.deep_scan = deep_scan
 
-        # Will represent the list of URL to check
-        self.url_to_check = [host]
-
         # Will represent the list of checked URL
-        self.checked_url = []
+        self.urls = {
+            host: {
+                'parent': '',
+                'url': None,
+                'result': None,
+                'check_time': None
 
-        # Will represent the list of broken URL
-        self.broken_url = {}
+            }
+        }
 
         # Will represent the previous webpage content
         self.prev_data = ''
@@ -101,13 +103,10 @@ class Checker:
         :url represent the URL to check
         """
         # We verify the URL is already checked
-        if url in self.checked_url:
+        if [u for u in self.urls if self.urls[u]['result'] and url == u]:
             return None
 
         self.logging.info('Checking of %s...' % url)
-
-        # We mark the URL checked
-        self.checked_url.append(url)
 
         # We make a connection
         try:
@@ -116,18 +115,19 @@ class Checker:
             else:
                 response = self.conn.head(url, timeout=2)
         except requests.exceptions.ReadTimeout:
-            self.broken_url[url] = "Timeout!"
+            self.urls[url]['result'] = False, None, "Timeout!"
         except requests.exceptions.ConnectionError:
-            self.broken_url[url] = "Connection aborted!"
+            self.urls[url]['result'] = False, None, "Connection aborted!"
         except requests.exceptions.TooManyRedirects:
-            self.broken_url[url] = "Too many redirection!"
+            self.urls[url]['result'] = False, None, "Too many redirection!"
         else:
             # We verify the response status
             # 2xx stand for request was successfully completed
             if response.ok:
+                self.urls[url]['result'] = True, response.status_code, response.reason
                 return response if self.is_same_host(url) else None
             else:
-                self.broken_url[url] = response.reason
+                self.urls[url]['result'] = False, response.status_code, response.reason
 
                 self.logging.warning(
                     '%s maybe broken because status code: %i' %
@@ -177,6 +177,8 @@ class Checker:
                 else:
                     continue
 
+                origin_url = url
+
                 # 1.1 and 1.2
                 if self.is_same_host(url):
                     # 1.2
@@ -207,11 +209,15 @@ class Checker:
                 # Except if the deep_scan is enable
                 # At this point, the URL belongs to the HOST
                 # We verify that the URL is neither already added nor checked
-                if url not in self.url_to_check \
-                    and url not in self.checked_url \
-                        and url != response.url:
+                if url not in self.urls and url != response.url:
                     self.logging.debug('Add the URL %s' % url)
-                    self.url_to_check.append(url)
+                    self.urls[url] = {
+                        'parent': response.url,
+                        'url': origin_url,
+                        'result': None,
+                        'check_time': None
+
+                    }
                 else:
                     continue
 
@@ -226,8 +232,20 @@ class Checker:
     def run(self) -> None:
         """Run the checker."""
         # We check while we have an URL unchecked
-        while (self.url_to_check):
-            response = self.check(self.url_to_check.pop(0))
-            if response:
-                self.update_list(response)
-            time.sleep(self.delay)
+        while 1:
+            url_to_check = [u for u in self.urls if not self.urls[u]['result']]
+            
+            if url_to_check:
+                pass
+            else:
+                break
+
+            while (url_to_check):
+                url = url_to_check.pop(0)
+                self.urls[url]['check_time'] = time.time()
+                response = self.check(url)
+                if response:
+                    self.update_list(response)
+                self.urls[url]['check_time'] = time.time() - self.urls[url]['check_time']
+                time.sleep(self.delay)
+

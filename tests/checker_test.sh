@@ -34,7 +34,7 @@ start_server() {
 # We start the test
 start_test() {
     report=$($PYTHON -m blc http://$HOST:$PORT -D -d 0 $BLC_FLAGS)
-    nb_broken_link_got=$(expr $(echo "$report" | grep -c .) - 2)
+    nb_broken_link_got=$(echo "$report"  | grep "\w* errors" -o | grep "[0-9]*" -o)
     if [ ! $nb_broken_link_got -eq $NB_BROKEN_LINK_EXPECTED ]; then
         echo "$NB_BROKEN_LINK_EXPECTED broken links expected, but $nb_broken_link_got got"
         echo "REPORT:"
