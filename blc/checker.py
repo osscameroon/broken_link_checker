@@ -74,6 +74,11 @@ class Checker:
             re.IGNORECASE
         )
 
+        self.REGEX_CLEAN_URL = re.compile(
+            r"[-A-Z0-9+&@#/%?=~_|!:,.;]*",
+            re.IGNORECASE
+        )
+
         # Regex to verify the content type
         self.REGEX_CONTENT_TYPE = re.compile(
             r"text/(xml|html)"
@@ -182,8 +187,10 @@ class Checker:
             # Some url can be escape by the browser
             data = html.unescape(data)
             
+            # We build a list of cleaned links
             urls = [
-                ii for i in self.REGEX_TEXT_URL.findall(data)
+                self.REGEX_CLEAN_URL.findall(ii)[0]
+                for i in self.REGEX_TEXT_URL.findall(data)
                 if i for ii in i if ii
             ]
 

@@ -95,6 +95,7 @@ def main(args):
 
     checker_threads = []
     report = {}
+    conn = None
 
     for target in args.host.split(','):
         # We initialize the checker
