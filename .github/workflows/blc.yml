@@ -22,3 +22,17 @@ jobs:
     - name: Run full test
       run:
         make test
+
+  linter:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+
+    - name: Lint check
+      run:
+        make lint

@@ -66,7 +66,8 @@ class Checker:
             r"|<url>(.*?)</url>"
             r"|src=[\'\"](.*?)[\'\"]"
             r"|src=(.*?)[ |>]"
-            # Ref: http://www.regexguru.com/2008/11/detecting-urls-in-a-block-of-text/
+            # Ref: http://www.regexguru.com/2008/11/
+            #   detecting-urls-in-a-block-of-text/
             r"|\b(https?://[-A-Z0-9+&@#/%?=~_|!:,.;]*[A-Z0-9+&@#/%=~_|])",
             re.IGNORECASE
         )
@@ -90,8 +91,8 @@ class Checker:
         if not url.scheme:
             return True
         elif url.scheme == host.scheme\
-         and url.netloc == host.netloc\
-           and url.port == host.port:
+            and url.netloc == host.netloc\
+                and url.port == host.port:
             return True
         else:
             return False
@@ -124,10 +125,12 @@ class Checker:
             # We verify the response status
             # 2xx stand for request was successfully completed
             if response.ok:
-                self.urls[url]['result'] = True, response.status_code, response.reason
+                self.urls[url]['result'] = (
+                    True, response.status_code, response.reason)
                 return response if self.is_same_host(url) else None
             else:
-                self.urls[url]['result'] = False, response.status_code, response.reason
+                self.urls[url]['result'] = (
+                    False, response.status_code, response.reason)
 
                 self.logging.warning(
                     '%s maybe broken because status code: %i' %
@@ -137,7 +140,8 @@ class Checker:
 
     def update_list(self, response: requests.Response) -> None:
         """
-        Update the list of URL to checked in function of the URL get in a webpage.
+        Update the list of URL to checked
+         in function of the URL get in a webpage.
 
         :response represent the http response who contains the data to analyze
         """
@@ -150,11 +154,14 @@ class Checker:
             self.logging.debug('Decoding of data...')
             data = data.decode()
 
-            # We verify if we are not already got this content in the previous request
-            if difflib.SequenceMatcher(None, data, self.prev_data).ratio() > 0.9:
+            # We verify if we are not already got this content
+            #   in the previous request
+            if difflib.SequenceMatcher(None, data, self.prev_data)\
+                    .ratio() > 0.9:
                 self.logging.warning(
-                    response.url + 
-                    ' skipped because content similar at +90% with the previous URL.'
+                    response.url + ''
+                    ' skipped because content similar'
+                    ' at +90% with the previous URL.'
                 )
                 return
             else:
@@ -162,7 +169,10 @@ class Checker:
 
             self.logging.debug('Getting of the URLs...')
 
-            urls = [ii for i in self.REGEX_TEXT_URL.findall(data) if i for ii in i if ii]
+            urls = [
+                ii for i in self.REGEX_TEXT_URL.findall(data)
+                if i for ii in i if ii
+            ]
 
             # In this step, we have two possibilities
             # 1. The URL belongs to the HOST
@@ -204,7 +214,8 @@ class Checker:
                 # At this point, the URL belongs to the HOST
                 # We verify that the URL is neither already added nor checked
                 if url in self.urls:
-                    if url != response.url and not response.url in self.urls[url]['parent']:
+                    if url != response.url\
+                            and response.url not in self.urls[url]['parent']:
                         self.urls[url]['parent'].append(response.url)
                 elif url != response.url:
                     self.logging.debug('Add the URL %s' % url)
@@ -231,7 +242,7 @@ class Checker:
         # We check while we have an URL unchecked
         while 1:
             url_to_check = [u for u in self.urls if not self.urls[u]['result']]
-            
+
             if not url_to_check:
                 break
 
@@ -241,6 +252,6 @@ class Checker:
                 response = self.check(url)
                 if response:
                     self.update_list(response)
-                self.urls[url]['check_time'] = time.time() - self.urls[url]['check_time']
+                self.urls[url]['check_time'] = (
+                    time.time() - self.urls[url]['check_time'])
                 time.sleep(self.delay)
-
