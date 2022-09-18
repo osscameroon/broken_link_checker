@@ -47,7 +47,7 @@ class Checker:
         # Will represent the list of checked URL
         self.urls = {
             host: {
-                'parent': '',
+                'parent': [],
                 'url': None,
                 'result': None,
                 'check_time': None
@@ -203,10 +203,13 @@ class Checker:
                 # Except if the deep_scan is enable
                 # At this point, the URL belongs to the HOST
                 # We verify that the URL is neither already added nor checked
-                if url not in self.urls and url != response.url:
+                if url in self.urls:
+                    if url != response.url and not response.url in self.urls[url]['parent']:
+                        self.urls[url]['parent'].append(response.url)
+                elif url != response.url:
                     self.logging.debug('Add the URL %s' % url)
                     self.urls[url] = {
-                        'parent': response.url,
+                        'parent': [response.url],
                         'url': origin_url,
                         'result': None,
                         'check_time': None
