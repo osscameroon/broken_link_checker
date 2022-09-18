@@ -162,20 +162,14 @@ class Checker:
 
             self.logging.debug('Getting of the URLs...')
 
-            matches = self.REGEX_TEXT_URL.findall(data)
+            urls = [ii for i in self.REGEX_TEXT_URL.findall(data) if i for ii in i if ii]
 
             # In this step, we have two possibilities
             # 1. The URL belongs to the HOST
             # 1.1. The URL is absolute
             # 1.2. The URL is relative
             # 2. The URL don't belongs to the HOST
-            for match in matches:
-                # We get the URL match
-                url = [i for i in match if i]
-                if url:
-                    url = url[0]
-                else:
-                    continue
+            for url in urls:
 
                 origin_url = url
 
