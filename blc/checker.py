@@ -186,7 +186,7 @@ class Checker:
 
             # Some url can be escape by the browser
             data = html.unescape(data)
-            
+
             # We build a list of cleaned links
             urls = [
                 self.REGEX_CLEAN_URL.findall(ii)[0]

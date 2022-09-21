@@ -93,8 +93,8 @@ def main(args):
     else:
         pass
 
-    checker_threads = []
     report = {}
+    # checker_threads = []
     conn = None
 
     for target in args.host.split(','):
@@ -125,12 +125,12 @@ def main(args):
     )
 
     # We start the checkers
-    for thread in checker_threads:
-        logging.info('Checking of %s' % args.host)
-        thread.start()
+    # for thread in checker_threads:
+    #    logging.info('Checking of %s' % args.host)
+    #    thread.start()
 
     # We wait for the completion
-    [thread.join() for thread in checker_threads]
+    # [thread.join() for thread in checker_threads]
 
     # We build the report
     msg = 'Hello, the report of the broken link checker is ready.\n'
