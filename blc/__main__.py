@@ -140,7 +140,7 @@ def main(args):
                         f"Real URL:   {info['url']}\n"
                         f"Check time: {round(info['check_time'], 4)} seconds\n"
                         f"Result:     {info['result'][1]} ->"
-                        " {info['result'][2]}\n"
+                        f" {info['result'][2]}\n"
                     )
                     acc += 1
                 else:
