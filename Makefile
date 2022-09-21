@@ -35,6 +35,7 @@ test: build
 	$(PIP) install -r /tmp/last_package
 	PYTHON=$(PYTHON) NB_BROKEN_LINK_EXPECTED=23 sh tests/checker_test.sh
 	PYTHON=$(PYTHON) NB_BROKEN_LINK_EXPECTED=31 BLC_FLAGS="-n" sh tests/checker_test.sh
+	PYTHON=$(PYTHON) NB_BROKEN_LINK_EXPECTED=31 BLC_FLAGS="-n -b 5" sh tests/checker_test.sh
 
 clean:
 	rm -rf $(VENVPATH) dist
