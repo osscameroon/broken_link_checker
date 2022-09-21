@@ -9,7 +9,7 @@ from .notifier import Notifier
 from configparser import ConfigParser
 import sys
 import logging
-import threading
+# import threading
 import coloredlogs
 
 
@@ -40,6 +40,7 @@ def main(args):
         "password": None,
         "smtp_server": None,
         "recipient": None,
+        "browser_sleep": None,
     }
 
     if not config_args.debug:
@@ -81,6 +82,9 @@ def main(args):
                         help='It represent the email where send the report')
     parser.add_argument('-n', '--deep-scan', action='store_true',
                         help='Enable the deep scan')
+    parser.add_argument('-b', '--browser_sleep', type=float,
+                        help='Enable browser extension '
+                        '(if params used) and set his sleep time')
     args = parser.parse_args()
 
     # We verify the dependency
@@ -93,8 +97,9 @@ def main(args):
     else:
         pass
 
-    checker_threads = []
     report = {}
+    # checker_threads = []
+    conn = None
 
     for target in args.host.split(','):
         # We initialize the checker
@@ -102,13 +107,20 @@ def main(args):
             target,
             delay=args.delay if args.delay is not None else 1.0,
             deep_scan=args.deep_scan,
+            browser_sleep=args.browser_sleep,
         )
+        if conn:
+            checker.conn = conn
+        else:
+            conn = checker.conn
         # We config the shared dict
         report[target] = checker.urls
 
-        t = threading.Thread(target=checker.run)
-        checker_threads.append(t)
-        t.daemon = True
+        # t = threading.Thread(target=checker.run)
+        # checker_threads.append(t)
+        # t.daemon = True
+
+        checker.run()
 
     # We initialize the notifier
     notifier = Notifier(
@@ -118,12 +130,12 @@ def main(args):
     )
 
     # We start the checkers
-    for thread in checker_threads:
-        logging.info('Checking of %s' % args.host)
-        thread.start()
+    # for thread in checker_threads:
+    #    logging.info('Checking of %s' % args.host)
+    #    thread.start()
 
     # We wait for the completion
-    [thread.join() for thread in checker_threads]
+    # [thread.join() for thread in checker_threads]
 
     # We build the report
     msg = 'Hello, the report of the broken link checker is ready.\n'
