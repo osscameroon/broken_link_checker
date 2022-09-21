@@ -40,6 +40,7 @@ def main(args):
         "password": None,
         "smtp_server": None,
         "recipient": None,
+        "browser_sleep": None,
     }
 
     if not config_args.debug:
@@ -81,6 +82,9 @@ def main(args):
                         help='It represent the email where send the report')
     parser.add_argument('-n', '--deep-scan', action='store_true',
                         help='Enable the deep scan')
+    parser.add_argument('-b', '--browser_sleep', type=float,
+                        help='Enable browser extension '
+                        '(if params used) and set his sleep time')
     args = parser.parse_args()
 
     # We verify the dependency
@@ -103,6 +107,7 @@ def main(args):
             target,
             delay=args.delay if args.delay is not None else 1.0,
             deep_scan=args.deep_scan,
+            browser_sleep=args.browser_sleep,
         )
         if conn:
             checker.conn = conn

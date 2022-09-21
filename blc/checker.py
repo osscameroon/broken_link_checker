@@ -25,7 +25,8 @@ class Checker:
         just verify the availability of these URL
     """
 
-    def __init__(self, host: str, delay: int = 1, deep_scan: bool = False):
+    def __init__(self, host: str, delay: int = 1, deep_scan: bool = False,
+                 browser_sleep: float = None):
         """Init the checker."""
         # We config the logger
         self.logging = logging.getLogger(f'checker({host})')
@@ -37,6 +38,9 @@ class Checker:
         self.conn.headers.update({
             "User-Agent": "BrokenLinkChecker/1.0",
         })
+        self.timeout = 2
+        self.browser_sleep = browser_sleep
+        self.max_download_size = 1048576  # 1MB
 
         self.host = host
 
@@ -120,9 +124,10 @@ class Checker:
         # We make a connection
         try:
             if self.is_same_host(url):
-                response = self.conn.get(url, timeout=2, stream=True)
+                response = self.conn.get(url, timeout=self.timeout,
+                                         stream=True)
             else:
-                response = self.conn.head(url, timeout=2)
+                response = self.conn.head(url, timeout=self.timeout)
         except requests.exceptions.ReadTimeout:
             self.urls[url]['result'] = False, None, "Timeout!"
         except requests.exceptions.ConnectionError:
@@ -156,18 +161,27 @@ class Checker:
         # We verify if the content is a webpage
         if self.REGEX_CONTENT_TYPE.match(response.headers['Content-Type']):
             self.logging.debug('Getting of the webpage...')
+            data = None
+
             # We execute the js script
-            try:
-                # We wait 10s to load the js and in case of connection latency
-                response.html.render(timeout=10, sleep=10)
-            except (AttributeError, requests_html.etree.ParserError):
-                # we read max 2**20 bytes by precaution
+            if self.browser_sleep is not None:
+                try:
+                    # We wait to load the js and in case of connection latency
+                    response.html.render(
+                        timeout=self.timeout,
+                        sleep=self.browser_sleep)
+                    data = response.html.html
+                except (AttributeError, requests_html.etree.ParserError):
+                    pass
+                except requests_html.pyppeteer.errors.TimeoutError:
+                    pass
+
+            if data is None:
+                # we read fixed bytes by precaution
                 response.raw.decode_content = True
-                data = response.raw.read(1048576)
+                data = response.raw.read(self.max_download_size)
                 self.logging.debug('Decoding of data...')
                 data = data.decode()
-            else:
-                data = response.html.html
 
             # We verify if we are not already got this content
             #   in the previous request
