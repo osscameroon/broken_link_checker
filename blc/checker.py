@@ -90,9 +90,10 @@ class Checker:
 
         if not url.scheme:
             return True
-        elif url.scheme == host.scheme\
-            and url.netloc == host.netloc\
-                and url.port == host.port:
+        elif (
+            url.scheme == host.scheme
+                and url.netloc == host.netloc
+                and url.port == host.port):
             return True
         else:
             return False
@@ -156,8 +157,8 @@ class Checker:
 
             # We verify if we are not already got this content
             #   in the previous request
-            if difflib.SequenceMatcher(None, data, self.prev_data)\
-                    .ratio() > 0.9:
+            if (difflib.SequenceMatcher(None, data, self.prev_data)
+                    .ratio() > 0.9):
                 self.logging.warning(
                     response.url + ''
                     ' skipped because content similar'
@@ -214,8 +215,8 @@ class Checker:
                 # At this point, the URL belongs to the HOST
                 # We verify that the URL is neither already added nor checked
                 if url in self.urls:
-                    if url != response.url\
-                            and response.url not in self.urls[url]['parent']:
+                    if (url != response.url
+                            and response.url not in self.urls[url]['parent']):
                         self.urls[url]['parent'].append(response.url)
                 elif url != response.url:
                     self.logging.debug('Add the URL %s' % url)

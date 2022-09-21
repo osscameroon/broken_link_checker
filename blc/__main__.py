@@ -86,9 +86,9 @@ def main(args):
     # We verify the dependency
     if not args.host:
         parser.error('host is required')
-    elif (args.sender or args.password or args.smtp_server or args.recipient)\
+    elif ((args.sender or args.password or args.smtp_server or args.recipient)
             and not (args.sender and args.password
-                     and args.smtp_server and args.recipient):
+                     and args.smtp_server and args.recipient)):
         parser.error('bad configuration of the notifier')
     else:
         pass
@@ -133,18 +133,23 @@ def main(args):
             acc = 0
             for url, info in report[target].items():
                 if not info['result'][0]:
-                    msg += "\n"
-                    f"URL:        {url}\n"
-                    f"Parent URL: {info['parent']}\n"
-                    f"Real URL:   {info['url']}\n"
-                    f"Check time: {round(info['check_time'], 4)} seconds\n"
-                    f"Result:     {info['result'][1]} -> {info['result'][2]}\n"
+                    msg += (
+                        "\n"
+                        f"URL:        {url}\n"
+                        f"Parent URL: {info['parent']}\n"
+                        f"Real URL:   {info['url']}\n"
+                        f"Check time: {round(info['check_time'], 4)} seconds\n"
+                        f"Result:     {info['result'][1]} ->"
+                        " {info['result'][2]}\n"
+                    )
                     acc += 1
                 else:
                     pass
-            msg += f"\nThats it. {acc} errors in {len(report[target])}"
-            " links found.\n"
-            "--------------\n\n"
+            msg += (
+                f"\nThats it. {acc} errors in {len(report[target])}"
+                " links found.\n"
+                "--------------\n\n"
+            )
         else:
             pass
 
