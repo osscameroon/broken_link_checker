@@ -1,77 +1,87 @@
 # Changelog
 
+## 2022-09-21
+- Support for dynamic webpage added
+
+## 2022-09-18
+- Speed improved
+- Report improved
+
+## 2022-09-13
+- Docker image added
+
 ## 2022-08-04
-- Rename broken_liknk_checker to blc
+- Rename broken_link_checker to blc
 
 ## 2022-05-05
-- Switch from urrlib to requests
+- Switch from urllib to requests
 
 ## 2022-05-02
-- Improve the convertion of relative to absolute URL
-- Improve the report
-- Improve the makefile
-- Fix problem of host changed
+- Convertion of relative to absolute URL improved
+- Report improved
+- Makefile improved
+- Problem of host changed fixed
 
 ## 2022-04-24
-- Fix the log of tests
-- Improve the report
-- Improve the detection of loop checking
-- Add makefile
+- Log of tests fixed
+- Report improved
+- Detection of loop checking improved
+- Makefile added
 
 ## 2022-04-07
 - Improve the tests
 - Improve the detection of loop checking
 
 ## 2022-04-05
-- Add CI
+- CI added
 
 ## 2022-04-02
-- Improve the tests
-- Add support for python >=3.8, <4
-- Redirection of the logging output to the stdout
+- Tests updated
+- Support for python >=3.8, <4 added
+- Redirection of the logging output file to the stdout
 
 ## 2022-04-01
-- Add deep scan
+- Deep scan added
 
 ## 2022-03-27
-- Improve the report
-- Improve the detection of 2xx http code
+- Report improved
+- Detection of 2xx http code improved
 
 ## 2022-03-20
-- Create a package for deployment on pypi
+- Configuration for deployment on pypi added
 
 ## 2022-03-13
-- Add parallel checking
+- Parallel checking added
 
 ## 2022-03-11
-- Fix error of server don't respond
+- Error of server don't respond fixed
 
 ## 2022-03-04
-- Improve the URLs finding
-- Improve the report
+- URLs finding improved
+- Report improved
 
 ## 2022-03-02
-- Add logging
+- Logging added
 
 ## 2022-02-22
-- Improve the program configuration
-- Add unit tests
+- Program configuration updated
+- Unit tests added
 
 ## 2022-02-19
-- Improve the URL finding
+- URL finding improved
 
 ## 2022-02-17
 - Make the project as module
 
 ## 2022-02-16
-- Improve the convertion relative to absolute URL
+- Convertion relative to absolute URL improved
 
 ## 2022-02-15
-- Fix problem of auto adding "/" un the URL
-- Improve the URLs finding
-- Add notification by email
-- Add possibility to config the program
-- Fix problem of recursive checking
+- Problem of auto adding "/" in the URL fixed
+- URLs finding improved
+- Notification by email added
+- Possibility to config the program added
+- Problem of recursive checking fixed
 
 ## 2022-02-13
 - Base code

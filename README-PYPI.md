@@ -63,5 +63,12 @@ python -m blc -c conf.ini
 
 *NB:* Some email service provider ask to enable some settings to allow less secure apps. 
 
+# Running the Project via Docker
+*NB: This docker image is not official*
+
+```bash
+docker run pythonbrad/blc:latest --help
+```
+
 # License
 MIT
