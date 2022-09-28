@@ -32,7 +32,7 @@ Install dependencies:
 make install-deps
 ```
 
-Build the package
+Build the package:
 ```bash
 make build
 ```
