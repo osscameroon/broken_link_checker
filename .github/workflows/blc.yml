@@ -19,9 +19,13 @@ jobs:
       with:
         fetch-depth: 1
 
-    - name: Run full test
+    - name: Run test
       run:
         make test
+
+    - name: Run integration test
+      run:
+        make shell-test
 
   linter:
 
