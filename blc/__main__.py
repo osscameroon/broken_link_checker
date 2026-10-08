@@ -1,132 +1,111 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""Main module of the Broken Link Checker."""
-
-
-from argparse import ArgumentParser
-from .checker import Checker
-from .notifier import Notifier
-from configparser import ConfigParser
-import sys
+import typer
 import logging
-# import threading
-import coloredlogs
+import sys
+from configparser import ConfigParser
+from typing import Optional
+from .checker import Checker  # Assuming existing module
+from .notifier import Notifier  # Assuming existing module
 
+app = typer.Typer()
 
-coloredlogs.install()
+def load_config(config_file: str) -> dict:
+    '''
+    the main propulse of this function is the load the configiration file
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+    input ::: config_file: configuration file
+    output : object configuration file
 
+    '''
+    config = ConfigParser()
+    try:
+        with open(config_file) as f:
+            config.read_file(f)
+    except OSError as err:
+        typer.echo(f"Error loading config: {err}", err=True)
+        raise typer.Exit(code=1)
 
-def main(args):
+    defaults = {}
+    if config.has_section('Checker'):
+        defaults.update(dict(config.items('Checker')))
+    if config.has_section('Notifier'):
+        defaults.update(dict(config.items('Notifier')))
+    return defaults
+
+@app.command()
+def main(
+    host: Optional[str] = typer.Option(None, help="Eg: http://example.com"),
+    delay: Optional[float] = typer.Option(None, "--delay", "-d", help="Delay between requests"),
+    sender: Optional[str] = typer.Option(None, help="Email used to send report"),
+    password: Optional[str] = typer.Option(None, help="Password for email login"),
+    smtp_server: Optional[str] = typer.Option(None, help="SMTP server to send report"),
+    recipient: Optional[str] = typer.Option(None, help="Recipient email"),
+    browser_sleep: Optional[float] = typer.Option(None, help="Browser extension sleep time"),
+    deep_scan: bool = typer.Option(False, "--deep-scan", "-n", help="Enable deep scan"),
+    config_file: Optional[str] = typer.Option(None, "--config-file", "-c", help="Path to configuration file"),
+    debug: bool = typer.Option(False, "--debug", "-D", help="Enable debug mode")
+):
     """Do something."""
-    # parse values from a configuration file if provided and use those as the
-    # default values for the argparse arguments
-    config_argparse = ArgumentParser(add_help=False)
-    config_argparse.add_argument('-c', '--config-file',
-                                 help='path to configuration file')
-    config_argparse.add_argument('-D', '--debug',
-                                 help='enable the debug mode',
-                                 action='store_true')
-    config_args, _ = config_argparse.parse_known_args(args)
 
-    defaults = {
-        "host": None,
-        "delay": None,
-        "sender": None,
-        "password": None,
-        "smtp_server": None,
-        "recipient": None,
-        "browser_sleep": None,
-    }
-
-    if not config_args.debug:
+    if not debug:
         logging.disable(logging.CRITICAL)
 
-    if config_args.config_file:
-        logging.info('Loading of the config file...')
-        try:
-            config_parser = ConfigParser()
-            with open(config_args.config_file) as f:
-                config_parser.read_file(f)
-            config_parser.read(config_args.config_file)
-        except OSError as err:
-            print(err)
-            sys.exit(1)
+    defaults = {
+        "host": host,
+        "delay": delay,
+        "sender": sender,
+        "password": password,
+        "smtp_server": smtp_server,
+        "recipient": recipient,
+        "browser_sleep": browser_sleep,
+    }
 
-        defaults.update(dict(config_parser.items('Checker')))
-        defaults.update(dict(config_parser.items('Notifier')))
+    # parse values from a configuration file if provided and use those as the
+    # default values for the argparse arguments
 
-    # parse the program's main arguments using the dictionary of defaults and
-    # the previous parsers as "parent' parsers
-    parser = ArgumentParser(
-        parents=[config_argparse])
-    parser.set_defaults(**defaults)
+    if config_file:
+        typer.echo("Loading configuration file...")
+        loaded = load_config(config_file)
+        
+        #update configuration file dict object
+        for k, v in loaded.items():
+            if k in defaults and defaults[k] is None:
+                defaults[k] = v
+        #typer.echo(defaults)
 
     if not defaults['host']:
-        parser.add_argument('host', type=str,
-                            help='Eg: http://example.com')
-    parser.add_argument('-d', '--delay', type=float,
-                        help='It represent the delay between each request')
-    parser.add_argument('-s', '--sender', type=str,
-                        help='It represent the email used to send the report')
-    parser.add_argument('-p', '--password', type=str,
-                        help='It represent the password used for the login')
-    parser.add_argument('-S', '--smtp_server', type=str,
-                        help='It represent the email server'
-                             ' used to send the report')
-    parser.add_argument('-r', '--recipient', type=str,
-                        help='It represent the email where send the report')
-    parser.add_argument('-n', '--deep-scan', action='store_true',
-                        help='Enable the deep scan')
-    parser.add_argument('-b', '--browser_sleep', type=float,
-                        help='Enable browser extension '
-                        '(if params used) and set his sleep time')
-    args = parser.parse_args()
+        typer.echo("Error: host is required", err=True)
+        raise typer.Exit(code=1)
 
-    # We verify the dependency
-    if not args.host:
-        parser.error('host is required')
-    elif ((args.sender or args.password or args.smtp_server or args.recipient)
-            and not (args.sender and args.password
-                     and args.smtp_server and args.recipient)):
-        parser.error('bad configuration of the notifier')
-    else:
-        pass
+    notifier_fields = [defaults['sender'], defaults['password'], defaults['smtp_server'], defaults['recipient']]
+    if any(notifier_fields) and not all(notifier_fields):
+        typer.echo("Error: bad configuration of the notifier", err=True)
+        raise typer.Exit(code=1)
 
     report = {}
-    # checker_threads = []
     conn = None
 
-    for target in args.host.split(','):
-        # We initialize the checker
+    for target in defaults['host'].split(','):
         checker = Checker(
             target,
-            delay=args.delay if args.delay is not None else 1.0,
-            deep_scan=args.deep_scan,
-            browser_sleep=args.browser_sleep,
+            delay=float(defaults['delay']) if defaults['delay'] else 1.0,
+            deep_scan=deep_scan,
+            browser_sleep=float(defaults['browser_sleep']) if defaults['browser_sleep'] else None
         )
         if conn:
             checker.conn = conn
         else:
             conn = checker.conn
+
         # We config the shared dict
         report[target] = checker.urls
-
-        # t = threading.Thread(target=checker.run)
-        # checker_threads.append(t)
-        # t.daemon = True
-
         checker.run()
 
     # We initialize the notifier
+
     notifier = Notifier(
-        smtp_server=args.smtp_server,
-        username=args.sender,
-        password=args.password,
+        smtp_server=defaults['smtp_server'],
+        username=defaults['sender'],
+        password=defaults['password'],
     )
 
     # We start the checkers
@@ -138,44 +117,37 @@ def main(args):
     # [thread.join() for thread in checker_threads]
 
     # We build the report
+
     msg = 'Hello, the report of the broken link checker is ready.\n'
     for target in report:
-        msg += f"--------------\nReport of {target}\n--------------"
+        msg += f"\n--------------\nReport of {target}\n--------------"
         if report[target]:
             acc = 0
             for url, info in report[target].items():
                 if not info['result'][0]:
                     msg += (
-                        "\n"
-                        f"URL:        {url}\n"
+                        f"\nURL:        {url}\n"
                         f"Parent URL: {info['parent']}\n"
                         f"Real URL:   {info['url']}\n"
                         f"Check time: {round(info['check_time'], 4)} seconds\n"
-                        f"Result:     {info['result'][1]} ->"
-                        f" {info['result'][2]}\n"
+                        f"Result:     {info['result'][1]} -> {info['result'][2]}\n"
                     )
                     acc += 1
-                else:
-                    pass
             msg += (
-                f"\nThats it. {acc} errors in {len(report[target])}"
-                " links found.\n"
-                "--------------\n\n"
+                f"\nThat's it. {acc} errors in {len(report[target])} links found.\n"
+                "--------------\n"
             )
-        else:
-            pass
-
+        
     # We verify if the email notifier is configured
-    if args.smtp_server:
-        # We notify the admin
-        logging.info('Sending of the report to %s...' % args.recipient)
+    if defaults['smtp_server']:
+        logging.info(f"Sending report to {defaults['recipient']}...")
         notifier.send(
             subject='Broken links found',
             body=msg or "No broken url found\n",
-            recipient=args.recipient)
+            recipient=defaults['recipient']
+        )
     else:
         print(msg)
 
-
-if __name__ == '__main__':
-    main(sys.argv[1:])
+if __name__ == "__main__":
+    app()

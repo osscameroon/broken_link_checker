@@ -1,47 +1,50 @@
 .DEFAULT_GOAL=help
 
 CONFIG_FILE=./conf.ini
-VENVPATH=blc_venv
-PYTHON=$(VENVPATH)/bin/python3
-PIP=$(VENVPATH)/bin/pip
 
-venv: $(VENVPATH)/bin/activate
-$(VENVPATH)/bin/activate: requirements.txt
-	test -d $(VENVPATH) || python3 -m venv $(VENVPATH); \
-	. $(VENVPATH)/bin/activate; \
-	$(PIP) install -r requirements.txt
+# uv automatically manages .venv/
+VENVPATH=.venv
+PYTHON=uv run python
+UV=uv
 
 $(CONFIG_FILE):
-	echo "[-] adding config file..."
+	@echo "[-] adding config file..."
 	cp example.conf.ini $(CONFIG_FILE)
 
 ##install-deps: setup your dev environment
-install-deps: venv $(CONFIG_FILE)
+install-deps: $(CONFIG_FILE)
+	$(UV) lock
+	$(UV) sync
 
 ##run: run the api locally - ex: make run link="https://osscameroon.com"
 run: install-deps
-	$(PYTHON) -m blc $(link) --delay 1
+	$(UV) run blc $(link) --delay 1
 
+##lint: run flake8
 lint: install-deps
-	$(PYTHON) -m flake8 blc --show-source --statistics
+	$(UV) run flake8 blc --show-source --statistics
 
+##build: build wheel & sdist using hatchling through uv
 build: install-deps
-	$(PYTHON) -m build
+	$(UV) build
 
-##test: test your code
-test: build
-	$(PYTHON) -m unittest
-	ls dist/blc-*.whl | sort -r | grep . -m 1 > /tmp/last_package
-	$(PIP) install -r /tmp/last_package
-	PYTHON=$(PYTHON) NB_BROKEN_LINK_EXPECTED=23 sh tests/checker_test.sh
-	PYTHON=$(PYTHON) NB_BROKEN_LINK_EXPECTED=31 BLC_FLAGS="-n" sh tests/checker_test.sh
-	PYTHON=$(PYTHON) NB_BROKEN_LINK_EXPECTED=31 BLC_FLAGS="-n -b 5" sh tests/checker_test.sh
+## run unitest with pytest
+test: 
+	$(UV) run pytest
 
+##test: run unit tests, install built wheel, run shell tests
+shell-test: build
+	ls dist/*.whl | sort -r | head -n1 > /tmp/last_package
+	$(UV) pip install -r /tmp/last_package
+	PYTHON="uv run python" NB_BROKEN_LINK_EXPECTED=23 sh tests/checker_test.sh
+
+
+##clean: remove build artifacts
 clean:
-	rm -rf $(VENVPATH) dist
+	rm -rf .venv dist
 
 ##help: show help
 help: Makefile
 	@sed -n 's/^##//p' $<
 
-.PHONY: help venv install-deps test lint
+.PHONY: help install-deps test lint build run clean

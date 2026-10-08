@@ -1,10 +1,12 @@
-FROM python:3-alpine
+FROM python:3.11
 
 WORKDIR /blc
 
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+COPY . /blc/
 
-COPY blc/* ./blc/
+RUN pip install uv
 
-ENTRYPOINT ["python", "-m", "blc"]
+RUN uv lock
+RUN uv sync
+
+ENTRYPOINT ["uv", "run", "python", "-m", "blc"]
