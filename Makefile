@@ -13,6 +13,7 @@ $(CONFIG_FILE):
 
 ##install-deps: setup your dev environment
 install-deps: $(CONFIG_FILE)
+	which uv || curl -LsSf https://astral.sh/uv/0.12.23/install.sh | sh
 	$(UV) lock
 	$(UV) sync
 
@@ -20,16 +21,17 @@ install-deps: $(CONFIG_FILE)
 run: install-deps
 	$(UV) run blc $(link) --delay 1
 
-##lint: run flake8
+##lint: run ruff
 lint: install-deps
-	$(UV) run flake8 blc --show-source --statistics
+	$(UV) tool run ruff format blc --check
+	$(UV) tool run ruff check blc
 
 ##build: build wheel & sdist using hatchling through uv
 build: install-deps
 	$(UV) build
 
 ## run unitest with pytest
-test: 
+test: install-deps
 	$(UV) run pytest
 
 ##test: run unit tests, install built wheel, run shell tests
@@ -41,7 +43,7 @@ shell-test: build
 
 ##clean: remove build artifacts
 clean:
-	rm -rf .venv dist
+	rm -rf .venv dist uv.lock
 
 ##help: show help
 help: Makefile

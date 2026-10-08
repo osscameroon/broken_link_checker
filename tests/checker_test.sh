@@ -5,7 +5,7 @@
 # to verify the working of the checker on a real web server.
 
 HOST=localhost
-PORT=8080
+PORT=18237
 counter=5
 
 start_server() {

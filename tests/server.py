@@ -1,10 +1,10 @@
 """This server is for test purpose."""
 
-from http.server import BaseHTTPRequestHandler, HTTPServer
-from socketserver import ThreadingMixIn
-import time
 import os
 import sys
+import time
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from socketserver import ThreadingMixIn
 
 path = os.path.dirname(os.path.realpath(__file__))
 
@@ -19,72 +19,70 @@ else:
 class ThreadingSimpleServer(ThreadingMixIn, HTTPServer):
     """Threading server."""
 
-    pass
-
 
 class MyServer(BaseHTTPRequestHandler):
     """Define the behavior of the server."""
 
     def do_GET(self):
         """All test request will be on this method."""
-        if '?' in self.path:
-            self.path = self.path.split('?')[0]
+        if "?" in self.path:
+            self.path = self.path.split("?")[0]
 
-        if self.path in ['/', '/home', '/abc/']:
+        if self.path in ["/", "/home", "/abc/"]:
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.end_headers()
 
-            with open(path+'/index.html', 'rb') as f:
+            with open(path + "/index.html", "rb") as f:
                 self.wfile.write(f.read())
-        elif self.path in ['/abc']:
+        elif self.path in ["/abc"]:
             self.send_response(404)
             self.end_headers()
-        elif self.path == '/error':
+        elif self.path == "/error":
             self.send_response(500)
             self.end_headers()
-        elif self.path == '/wait':
+        elif self.path == "/wait":
             time.sleep(3600)
-        elif self.path == '/empty':
+        elif self.path == "/empty":
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.end_headers()
-        elif self.path == '/null':
+        elif self.path == "/null":
             pass
-        elif self.path == '/rss':
+        elif self.path == "/rss":
             self.send_response(200)
             self.send_header("Content-type", "application/rss+xml")
             self.end_headers()
 
-            with open(path+'/data.rss', 'rb') as f:
+            with open(path + "/data.rss", "rb") as f:
                 self.wfile.write(f.read())
-        elif self.path == '/html':
+        elif self.path == "/html":
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.end_headers()
 
-            with open(path+'/data.html', 'rb') as f:
+            with open(path + "/data.html", "rb") as f:
                 self.wfile.write(f.read())
-        elif self.path == '/html/':
+        elif self.path == "/html/":
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.end_headers()
 
-            with open(path+'/data2.html', 'rb') as f:
+            with open(path + "/data2.html", "rb") as f:
                 self.wfile.write(f.read())
-        elif self.path.replace('/', '').isdigit():
-            self.send_response(int(self.path.replace('/', '')))
+        elif self.path.replace("/", "").isdigit():
+            self.send_response(int(self.path.replace("/", "")))
             self.send_header("Content-type", "text/html")
             self.end_headers()
-        elif self.path == '/good':
+        elif self.path == "/good":
             self.send_response(301)
-            self.send_header('Location', '/201')
+            self.send_header("Location", "/201")
             self.end_headers()
-        elif self.path == '/c/i/r/c/u/l/a/r':
+        elif self.path == "/c/i/r/c/u/l/a/r":
             self.send_response(301)
-            self.send_header('Location', '/')
+            self.send_header("Location", "/")
             self.end_headers()
-        elif self.path.startswith('/c/i/r/c/u/l/a/r/'):
+        elif self.path.startswith("/c/i/r/c/u/l/a/r/"):
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.end_headers()
@@ -96,13 +94,13 @@ class MyServer(BaseHTTPRequestHandler):
                     <a href="c/i/r/c/u/l/a/r/">
                 </body>
                 </html>""")
-        elif self.path == '/iredirect':
+        elif self.path == "/iredirect":
             self.send_response(301)
-            self.send_header('Location', '/iredirect')
+            self.send_header("Location", "/iredirect")
             self.end_headers()
-        elif self.path == '/bad':
+        elif self.path == "/bad":
             self.send_response(301)
-            self.send_header('Location', '/401')
+            self.send_header("Location", "/401")
             self.end_headers()
         else:
             self.send_response(404)
@@ -116,7 +114,7 @@ class MyServer(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     server = ThreadingSimpleServer((hostName, serverPort), MyServer)
-    print("Server started http://%s:%s" % (hostName, serverPort))
+    print(f"Server started http://{hostName}:{serverPort}")
 
     try:
         server.serve_forever()
