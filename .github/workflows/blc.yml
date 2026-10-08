@@ -40,3 +40,20 @@ jobs:
     - name: Lint check
       run:
         make lint
+
+  docker:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+
+    - name: Docker check
+      run: |
+        docker build -t blc .
+        docker run blc --help
+
+
