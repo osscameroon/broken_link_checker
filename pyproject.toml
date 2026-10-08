@@ -4,8 +4,7 @@ version = "0.2.0"
 description = "Check the broken links on a website"
 readme = "README-PYPI.md"
 authors = [
-    { name = "pythonbrad", email = "fomegnemeudje@outlook.com" },
-    { name = "Darix SAMANI SIEWE", email = "samanidarix@gmail.com" }
+    { name = "Brady Fomegne", email = "brady.fomegne@outlook.com" }
 ]
 requires-python = ">=3.10"
 maintainers = [
