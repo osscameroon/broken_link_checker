@@ -62,3 +62,18 @@ class CheckerTest(unittest.TestCase):
         checker = Checker("localhost", deep_scan=True)
         checker.update_list(Response)
         self.assertEqual(len(checker.urls), 36)
+
+    def test_update_list_missing_content_type(self):
+        """A response without a Content-Type header is ignored, not a crash."""
+
+        class Response:
+            headers: ClassVar = {}
+            url: ClassVar = "http://localhost/"
+
+            def close():
+                pass
+
+        checker = Checker(Response.url)
+        checker.update_list(Response)
+
+        self.assertEqual(len(checker.urls), 1)
