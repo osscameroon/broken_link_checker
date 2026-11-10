@@ -153,7 +153,10 @@ class Checker:
         :response represent the http response who contains the data to analyze
         """
         # We verify if the content is a webpage
-        if self.REGEX_CONTENT_TYPE.match(response.headers["Content-Type"]):
+        # A response without a Content-Type header (an edge case for some
+        # servers) is not a webpage: ignore it instead of raising KeyError.
+        content_type = response.headers.get("Content-Type", "")
+        if self.REGEX_CONTENT_TYPE.match(content_type):
             self.logging.debug("Getting of the webpage...")
             data = None
 
@@ -260,9 +263,7 @@ class Checker:
             response.close()
         else:
             self.logging.warning(
-                "{} ignored because Content-Type {}".format(
-                    response.url, response.headers["Content-Type"]
-                )
+                "{} ignored because Content-Type {}".format(response.url, content_type)
             )
 
     def run(self) -> None:
